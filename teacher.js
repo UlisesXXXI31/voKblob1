@@ -169,7 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (response.ok) {
                 teacherStatusMessage.textContent = `¡Profesor ${name} añadido con éxito!`;
                 teacherStatusMessage.style.color = "green";
-                alert(`¡Importante! La contraseña temporal para ${name} es: ${password}`);
+                alert(`¡Importante! La contraseña para ${name} es: ${password}`);
                 teacherForm.reset();
                 await fetchAndDisplayStudents();
             } else {
@@ -213,6 +213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (response.ok) {
                 studentStatusMessage.textContent = `¡Alumno ${name} añadido con éxito!`;
                 studentStatusMessage.style.color = "green";
+                alert(`¡Importante! La contraseña para ${name} es: ${password}`);
                 studentForm.reset();
                 await fetchAndDisplayStudents();
             } else {
