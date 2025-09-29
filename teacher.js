@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         const name = studentNameInput.value;
         const email = studentEmailInput.value;
-        const password = 'EisA1';
+        const password = generateRandomPassword();
         studentStatusMessage.textContent = "Añadiendo alumno...";
         studentStatusMessage.style.color = "black";
 
