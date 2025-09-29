@@ -167,9 +167,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (response.ok) {
+                alert(`¡Importante! La contraseña para ${name} es: ${password}`);
                 teacherStatusMessage.textContent = `¡Profesor ${name} añadido con éxito!`;
                 teacherStatusMessage.style.color = "green";
-                alert(`¡Importante! La contraseña para ${name} es: ${password}`);
+                
                 teacherForm.reset();
                 await fetchAndDisplayStudents();
             } else {
@@ -211,9 +212,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (response.ok) {
+                alert(`¡Importante! La contraseña para ${name} es: ${password}`);
                 studentStatusMessage.textContent = `¡Alumno ${name} añadido con éxito!`;
                 studentStatusMessage.style.color = "green";
-                alert(`¡Importante! La contraseña para ${name} es: ${password}`);
+                
                 studentForm.reset();
                 await fetchAndDisplayStudents();
             } else {
