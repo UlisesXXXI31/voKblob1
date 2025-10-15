@@ -386,7 +386,12 @@ console.log("Enviando datos de progreso con 'completed' dinámico:", progressDat
     function iniciarTraducir() {
         traducirPalabras = [...leccionActual.palabras];
         traducirIndice = 0;
+        mezclarPalabras(traducirPalabras);
         mostrarPalabraTraducir();
+    }
+
+    function mezclarPalabras(array){
+        array.sort(() => Math.random() - 0.5);
     }
 
     function mostrarPalabraTraducir() {
@@ -394,6 +399,7 @@ console.log("Enviando datos de progreso con 'completed' dinámico:", progressDat
             if (actividadJuego) actividadJuego.innerHTML = `<p>Has terminado la actividad Traducir.</p>`;
             return;
         }
+        
         const palabra = traducirPalabras[traducirIndice];
         if (actividadJuego) {
             actividadJuego.innerHTML = `
@@ -640,7 +646,11 @@ function seleccionarEmparejar(tipo, btn, valor) {
     function iniciarEscuchar() {
         escucharPalabras = [...leccionActual.palabras];
         escucharIndice = 0;
+        mezclarPalabras(escucharPalabras);
         mostrarPalabraEscuchar();
+    }
+    function mezclarPalabras(array){
+        array.sort(() => Math.random() - 0.5);
     }
 
     function mostrarPalabraEscuchar() {
@@ -710,7 +720,12 @@ function seleccionarEmparejar(tipo, btn, valor) {
     function iniciarPronunciar(leccionSeleccionada) {
         palabrasPronunciacion = leccionSeleccionada.palabras.map(p => p.aleman);
         indicePalabraActual = 0;
+        mezclarPalabras(palabrasPronunciacion);
         mostrarPalabraPronunciacion();
+    }
+
+    function mezclarPalabras(array){
+        array.sort(() => Math.random() - 0.5);
     }
 
     function mostrarPalabraPronunciacion() {
