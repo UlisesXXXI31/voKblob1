@@ -1354,7 +1354,7 @@ aleman: "der Stadtmusikant",espanol: "el músico "},
       id: 13,
       nombre: "Reisen und Urlaub",
       palabras: [
-        { aleman: "die Übernachtung", espanol: "la pernoctación” },
+        { aleman: "die Übernachtung", espanol: "la pernoctación"},
         { aleman: "sich erholen", espanol: "recuperarse" },
         { aleman: "das Zeichen", espanol: "el signo" },
         { aleman: "tauchen", espanol: "bucear" },
