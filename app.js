@@ -18,8 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     // ---- VARIABLES GLOBALES Y ELEMENTOS DEL DOM ----
-    let puntos = 0;
-    let puntosUltimaSesion = 0;
+    let puntos = parseInt(localStorage.getItem('puntosTotales')) || 0;
+    let puntosUltimaSesion = parseInt(localStorage.getItem('puntosUltimaSesionGuardados')) || 0;
+    let leccionActual = null;
     let leccionActual = null;
     let actividadActual = null;
 
@@ -35,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const puntosTexto = document.getElementById("puntos");
     const btnReiniciarPuntos = document.getElementById("btn-reiniciar-puntos");
     const btnVerHistorial = document.getElementById("btn-ver-historial");
-    const btnGuardarPuntos = document.getElementById("btn-guardar-puntos");
+    const btnGuardarPuntos = document.getElementById("btn-Guardar-Puntos");
     const pantallaListaPalabras = document.getElementById("pantalla-lista-palabras");
     const listaPalabrasContainer = document.getElementById("lista-palabras-container");
     const tituloListaLeccion = document.getElementById("titulo-lista-leccion");
@@ -260,12 +261,16 @@ registerServiceWorker();
                 localStorage.setItem("historialPuntos", JSON.stringify(historial));
             }
             puntosUltimaSesion = puntos;
+            localStorage.setItem("puntosUltimaSesionGuardados", puntosUltimaSesion.toString());
+           localStorage.setItem('puntosTotales', puntos.toString());
             return;
         }
 
         const puntosSesion = puntos - puntosUltimaSesion;
         if (puntosSesion <= 0) {
             puntosUltimaSesion = puntos;
+            localStorage.setItem("puntosUltimaSesionGuardados", puntosUltimaSesion.toString());
+           localStorage.setItem('puntosTotales', puntos.toString());
             return;
         }
         // --- LÓGICA PARA DETERMINAR SI LA ACTIVIDAD FUE COMPLETADA ---
@@ -339,6 +344,8 @@ console.log("Enviando datos de progreso con 'completed' dinámico:", progressDat
         });
         localStorage.setItem("historialPuntos", JSON.stringify(historial));
         puntosUltimaSesion = puntos;
+        localStorage.setItem("puntosUltimaSesionGuardados", puntosUltimaSesion.toString());
+        localStorage.setItem('puntosTotales', puntos.toString());
     }
     function mostrarHistorial() {
         const historialContainer = document.getElementById("historial-container");
@@ -434,6 +441,7 @@ console.log("Enviando datos de progreso con 'completed' dinámico:", progressDat
             puntos++;
             traducirIndice++;
             actualizarPuntos();
+            localStorage.setItem('puntosTotales', puntos.toString());
             setTimeout(mostrarPalabraTraducir, 1000);
             // Esto solo se registrará cuando la actividad completa haya terminado
         } else {
@@ -536,6 +544,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
         if (correcto) {
             puntos++;
             actualizarPuntos();
+            localStorage.setItem('puntosTotales', puntos.toString());
             if (feedback) {
                 feedback.textContent = "¡Correcto!";
                 feedback.style.color = "green";
@@ -629,6 +638,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
                     sonidoCorrcto.play();
                     puntos++;
                     actualizarPuntos();
+                    localStorage.setItem('puntosTotales', puntos.toString());
                     eleccionIndice++;
                     setTimeout(mostrarPreguntaEleccion, 1000);
                 } else {
@@ -707,6 +717,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
             puntos++;
             escucharIndice++;
             actualizarPuntos();
+            localStorage.setItem('puntosTotales', puntos.toString());
             setTimeout(mostrarPalabraEscuchar, 1000);
         } else {
             if (feedback) {
@@ -788,6 +799,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
                 sonidoCorrcto.play();
                 puntos++;
                 actualizarPuntos();
+                localStorage.setItem('puntosTotales', puntos.toString());
                 indicePalabraActual++;
                 setTimeout(mostrarPalabraPronunciacion, 2000);
             } else {
