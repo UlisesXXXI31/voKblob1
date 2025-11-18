@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let puntos = parseInt(localStorage.getItem('puntosTotales')) || 0;
     let puntosUltimaSesion = parseInt(localStorage.getItem('puntosUltimaSesionGuardados')) || 0;
     let leccionActual = null;
-    let leccionActual = null;
     let actividadActual = null;
 
     // Elementos del DOM
