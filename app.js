@@ -530,6 +530,11 @@ console.log("Enviando datos de progreso con 'completed' dinámico:", progressDat
             }
             sonidoCorrcto.play();
             puntos++;
+
+            // <<< INTEGRACIÓN RACHA >>>
+            actualizarRacha(); 
+            // <<< FIN INTEGRACIÓN RACHA >>>
+            
             traducirIndice++;
             actualizarPuntos();
             localStorage.setItem('puntosTotales', puntos.toString());
@@ -634,6 +639,11 @@ function seleccionarEmparejar(tipo, btn, valor) {
         const correcto = bloquePalabrasActual.some(p => p.aleman === palabraAleman && p.espanol === palabraEspanol);
         if (correcto) {
             puntos++;
+
+            // <<< INTEGRACIÓN RACHA >>>
+            actualizarRacha(); 
+            // <<< FIN INTEGRACIÓN RACHA >>>
+            
             actualizarPuntos();
             localStorage.setItem('puntosTotales', puntos.toString());
             if (feedback) {
@@ -728,6 +738,11 @@ function seleccionarEmparejar(tipo, btn, valor) {
                     }
                     sonidoCorrcto.play();
                     puntos++;
+
+                    // <<< INTEGRACIÓN RACHA >>>
+                    actualizarRacha(); 
+                    // <<< FIN INTEGRACIÓN RACHA >>>
+                    
                     actualizarPuntos();
                     localStorage.setItem('puntosTotales', puntos.toString());
                     eleccionIndice++;
@@ -806,6 +821,11 @@ function seleccionarEmparejar(tipo, btn, valor) {
             }
             sonidoCorrcto.play();
             puntos++;
+
+            // <<< INTEGRACIÓN RACHA >>>
+            actualizarRacha(); 
+            // <<< FIN INTEGRACIÓN RACHA >>>
+            
             escucharIndice++;
             actualizarPuntos();
             localStorage.setItem('puntosTotales', puntos.toString());
@@ -889,6 +909,11 @@ function seleccionarEmparejar(tipo, btn, valor) {
                 }
                 sonidoCorrcto.play();
                 puntos++;
+
+                // <<< INTEGRACIÓN RACHA >>>
+                actualizarRacha(); 
+                // <<< FIN INTEGRACIÓN RACHA >>>
+                
                 actualizarPuntos();
                 localStorage.setItem('puntosTotales', puntos.toString());
                 indicePalabraActual++;
