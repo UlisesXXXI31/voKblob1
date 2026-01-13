@@ -1457,7 +1457,7 @@ aleman: "der Stadtmusikant",espanol: "el músico "},
       id: 14,
       nombre: "Meinung und mehr",
       palabras: [
-        { aleman: "Ich bin der Meinung , Ansicht, dass", espanol: "Opino que” },
+        { aleman: "Ich bin der Meinung , Ansicht, dass", espanol: "Opino que" },
         { aleman: "Meiner Meinung , Ansicht nach  ", espanol: "En mi opinión" },
         { aleman: "Ich denke, dass", espanol: "pienso que" },
         { aleman: "Ich meine, dass", espanol: "opino que" },
