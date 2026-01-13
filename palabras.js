@@ -1449,13 +1449,13 @@ aleman: "der Stadtmusikant",espanol: "el músico "},
         { aleman: "sich befinden", espanol: "hallarse" },
         { aleman: "die Burg", espanol: "el castillo" },
         { aleman: "sich verlaufen", espanol: "perder el camino" },
-        { aleman: "halten", espanol: "detenerse" },
+        { aleman: "halten", espanol: "detenerse" }
        
       ]
     },
     {
       id: 14,
-      nombre: "Meinungundmehr",
+      nombre: "Meinung und mehr",
       palabras: [
         { aleman: "Ich bin der Meinung , Ansicht, dass", espanol: "Opino que” },
         { aleman: "Meiner Meinung , Ansicht nach  ", espanol: "En mi opinión" },
@@ -1508,9 +1508,8 @@ aleman: "der Stadtmusikant",espanol: "el músico "},
         { aleman: "Mich nervt es , wenn….", espanol: "Me molesta, cuando, si…" },
         { aleman: "Hier ist  ……. genauso  wie …. , aber..", espanol: "establecido" },
         { aleman: "sogar", espanol: "incluso" },
-        { aleman: "zustimmen", espanol: "aceptar" },
+        { aleman: "zustimmen", espanol: "aceptar" }
         ]
     },
-   
   ]
 };
