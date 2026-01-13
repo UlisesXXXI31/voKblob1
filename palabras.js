@@ -1510,7 +1510,8 @@ aleman: "der Stadtmusikant",espanol: "el músico "},
         { aleman: "sogar", espanol: "incluso" },
         { aleman: "zustimmen", espanol: "aceptar" }
         ]
-    }, {
+    }, 
+    {
       id: 15,
       nombre: "Umwelt",
       palabras: [
