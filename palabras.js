@@ -1581,6 +1581,5 @@ aleman: "der Stadtmusikant",espanol: "el músico "},
         { aleman: "in Gefahr sein", espanol: "estar en peligro" }
       ]
     },
-
   ]
 };
