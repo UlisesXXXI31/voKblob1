@@ -1515,7 +1515,7 @@ aleman: "der Stadtmusikant",espanol: "el músico "},
       id: 15,
       nombre: "Umwelt",
       palabras: [
-        { aleman: "die Umwelt ", espanol: "el  medioambiente” },
+        { aleman: "die Umwelt ", espanol: "el  medioambiente" },
         { aleman: "umweltfreundlich", espanol: "ecológico" },
         { aleman: "ökologisch", espanol: "ecológico" },
         { aleman: "die Welt", espanol: "el mundo" },
