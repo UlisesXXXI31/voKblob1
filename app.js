@@ -23,7 +23,7 @@ const sonidoCorrecto = new Audio("audios/correcto.mp3");
 const sonidoIncorrecto = new Audio("audios/incorrecto.mp3");
 
 document.addEventListener("DOMContentLoaded", () => {
-    // ---- 1. AUTENTICACIÓN ----
+    // ---- 1. AUTENTICACIÓN Y CARGA INICIAL ----
     const userDataStr = localStorage.getItem('userData');
     const userRole = localStorage.getItem('role');
 
@@ -33,8 +33,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     usuarioActual = JSON.parse(userDataStr);
+
+    // SEGURIDAD: Si el usuario no tiene el objeto stats, se lo creamos para evitar errores de "undefined"
+    if (!usuarioActual.stats) {
+        usuarioActual.stats = { 
+            racha_actual: 0, 
+            puntos_totales: 0, 
+            liga_actual: 'Bronce', 
+            puntos_semanales: 0 
+        };
+    }
+
     console.log("✅ Sesión activa:", usuarioActual.name);
 
+    // Mostrar el contenedor de la app
     const appContainer = document.getElementById("app-container");
     if (appContainer) {
         appContainer.classList.remove('pantalla-oculta');
@@ -64,6 +76,16 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btn-volver-actividades")?.addEventListener("click", () => {
         mostrarPantalla("pantalla-actividades");
     });
+
+    // Botón para ver clasificación
+    document.getElementById("btn-ver-ranking")?.addEventListener("click", () => {
+        mostrarPantalla("pantalla-ranking");
+        cargarRanking();
+    });
+
+    document.getElementById("btn-volver-ranking")?.addEventListener("click", () => {
+        mostrarPantalla("pantalla-lecciones");
+    });
 });
 
 // ---- 3. ESTADÍSTICAS Y SINCRONIZACIÓN (VERCEL) ----
@@ -78,6 +100,9 @@ function actualizarInterfazStats() {
     const rachaNumeroEl = document.getElementById('racha-numero');
     if (rachaNumeroEl) rachaNumeroEl.textContent = stats.racha_actual || 0;
 
+    const ligaNombreEl = document.getElementById('liga-nombre');
+    if (ligaNombreEl) ligaNombreEl.textContent = stats.liga_actual || 'Bronce';
+
     const rachaImagenEl = document.getElementById('racha-imagen');
     if (rachaImagenEl) {
         rachaImagenEl.style.visibility = (stats.racha_actual > 0) ? 'visible' : 'hidden';
@@ -85,17 +110,10 @@ function actualizarInterfazStats() {
 }
 
 async function registrarAcierto(puntosGanados = 1) {
-    if (!usuarioActual) return;
-
-    // Red de seguridad: si stats no existe, lo inicializamos
-    if (!usuarioActual.stats) {
-        usuarioActual.stats = {
-            racha_actual: 0,
-            puntos_totales: 0,
-            puntos_semanales: 0,
-            liga_actual: 'Bronce'
-        };
-    }
+    sonidoCorrecto.play();
+    
+    // Nueva protección antes de enviar
+    if (!usuarioActual.stats) usuarioActual.stats = {};
 
     const progressData = {
         user: usuarioActual.id || usuarioActual._id,
@@ -113,9 +131,8 @@ async function registrarAcierto(puntosGanados = 1) {
         });
 
         const data = await response.json();
-
         if (response.ok) {
-            // Actualizamos racha y puntos con seguridad
+            // Actualización segura de stats locales
             usuarioActual.stats.racha_actual = data.racha;
             usuarioActual.stats.puntos_totales = (usuarioActual.stats.puntos_totales || 0) + puntosGanados;
             
@@ -123,11 +140,11 @@ async function registrarAcierto(puntosGanados = 1) {
             actualizarInterfazStats();
         }
     } catch (error) {
-        console.error('❌ Error sincronizando:', error);
+        console.error('❌ Error sincronizando con Vercel:', error);
     }
 }
 
-// ---- 4. NAVEGACIÓN ----
+// ---- 4. NAVEGACIÓN Y RANKING ----
 
 function mostrarPantalla(idPantalla) {
     document.querySelectorAll('.pantalla').forEach(p => {
@@ -138,6 +155,29 @@ function mostrarPantalla(idPantalla) {
     if (pantalla) {
         pantalla.classList.remove("pantalla-oculta");
         pantalla.classList.add("pantalla-activa");
+    }
+}
+
+async function cargarRanking() {
+    const liga = usuarioActual.stats.liga_actual || 'Bronce';
+    const listaUI = document.getElementById("lista-ranking");
+    if (!listaUI) return;
+    
+    listaUI.innerHTML = "<tr><td colspan='3'>Cargando...</td></tr>";
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/leaderboard/${liga}`);
+        const ranking = await response.json();
+        listaUI.innerHTML = "";
+        ranking.forEach((alumno, index) => {
+            const esYo = alumno.name === usuarioActual.name;
+            const tr = document.createElement("tr");
+            if (esYo) tr.style.backgroundColor = "#fff9c4";
+            tr.innerHTML = `<td>${index + 1}</td><td>${alumno.name} ${esYo ? '(Tú)' : ''}</td><td>${alumno.stats.puntos_semanales} XP</td>`;
+            listaUI.appendChild(tr);
+        });
+    } catch (e) {
+        listaUI.innerHTML = "<tr><td colspan='3'>Error al cargar ranking</td></tr>";
     }
 }
 
@@ -426,7 +466,6 @@ function escucharVoz(palabraCorrecta) {
     rec.onerror = () => feedback.textContent = "Error al escuchar.";
 }
 
-// Algoritmo de similitud
 function levenshtein(a, b) {
     const matrix = [];
     for (let i = 0; i <= b.length; i++) matrix[i] = [i];
@@ -438,51 +477,4 @@ function levenshtein(a, b) {
         }
     }
     return matrix[b.length][a.length];
-
-    // Configurar botón para abrir el ranking
-    document.getElementById("btn-ver-ranking")?.addEventListener("click", () => {
-        mostrarPantalla("pantalla-ranking");
-        cargarRanking();
-    });
-
-    document.getElementById("btn-volver-ranking")?.addEventListener("click", () => {
-        mostrarPantalla("pantalla-lecciones");
-    });
-
-    // Función para pedir los datos a Vercel y dibujarlos
-    async function cargarRanking() {
-        const ligaActual = usuarioActual.stats.liga_actual || 'Bronce';
-        document.getElementById("titulo-liga-ranking").textContent = `Clasificación - Liga ${ligaActual}`;
-        
-        const listaUI = document.getElementById("lista-ranking");
-        listaUI.innerHTML = "<tr><td colspan='3'>Cargando ranking...</td></tr>";
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/leaderboard/${ligaActual}`);
-            const ranking = await response.json();
-
-            listaUI.innerHTML = ""; // Limpiar
-
-            ranking.forEach((alumno, index) => {
-                const esYo = alumno.name === usuarioActual.name;
-                const fila = document.createElement("tr");
-                
-                // Resaltar al alumno actual en la lista
-                if (esYo) fila.style.backgroundColor = "#fff9c4"; 
-                fila.style.borderBottom = "1px solid #eee";
-
-                fila.innerHTML = `
-                    <td style="padding: 10px;">${index + 1}</td>
-                    <td style="padding: 10px; font-weight: ${esYo ? 'bold' : 'normal'}">
-                        ${alumno.name} ${esYo ? '(Tú)' : ''}
-                    </td>
-                    <td style="padding: 10px;">${alumno.stats.puntos_semanales} XP</td>
-                `;
-                listaUI.appendChild(fila);
-            });
-        } catch (error) {
-            console.error("Error cargando ranking:", error);
-            listaUI.innerHTML = "<tr><td colspan='3'>Error al cargar el ranking.</td></tr>";
-        }
-    }
 }
