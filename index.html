@@ -76,6 +76,29 @@
             <div id="historial-container"></div>
             <button id="btn-salir-historial">Volver</button>
         </div>
+
+        <!-- Pantalla de Clasificación / Marcadores -->
+<div id="pantalla-ranking" class="pantalla pantalla-oculta">
+    <h2 id="titulo-liga-ranking">Clasificación - Liga Bronce</h2>
+    <p style="font-size: 0.9rem; color: #666;">Los mejores de esta semana</p>
+    
+    <div id="ranking-container" style="margin: 20px 0;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd;">
+                    <th>#</th>
+                    <th>Alumno</th>
+                    <th>Puntos (XP)</th>
+                </tr>
+            </thead>
+            <tbody id="lista-ranking">
+                <!-- Aquí se cargarán los alumnos dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+    
+    <button id="btn-volver-ranking" class="btn-volver">Volver</button>
+</div>
     </div>
 
     <footer style="text-align:center; margin-top: 30px; font-size: 12px; color: #888;">
