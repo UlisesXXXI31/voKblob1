@@ -425,4 +425,51 @@ function levenshtein(a, b) {
         }
     }
     return matrix[b.length][a.length];
+
+    // Configurar botón para abrir el ranking
+    document.getElementById("btn-ver-ranking")?.addEventListener("click", () => {
+        mostrarPantalla("pantalla-ranking");
+        cargarRanking();
+    });
+
+    document.getElementById("btn-volver-ranking")?.addEventListener("click", () => {
+        mostrarPantalla("pantalla-lecciones");
+    });
+
+    // Función para pedir los datos a Vercel y dibujarlos
+    async function cargarRanking() {
+        const ligaActual = usuarioActual.stats.liga_actual || 'Bronce';
+        document.getElementById("titulo-liga-ranking").textContent = `Clasificación - Liga ${ligaActual}`;
+        
+        const listaUI = document.getElementById("lista-ranking");
+        listaUI.innerHTML = "<tr><td colspan='3'>Cargando ranking...</td></tr>";
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/leaderboard/${ligaActual}`);
+            const ranking = await response.json();
+
+            listaUI.innerHTML = ""; // Limpiar
+
+            ranking.forEach((alumno, index) => {
+                const esYo = alumno.name === usuarioActual.name;
+                const fila = document.createElement("tr");
+                
+                // Resaltar al alumno actual en la lista
+                if (esYo) fila.style.backgroundColor = "#fff9c4"; 
+                fila.style.borderBottom = "1px solid #eee";
+
+                fila.innerHTML = `
+                    <td style="padding: 10px;">${index + 1}</td>
+                    <td style="padding: 10px; font-weight: ${esYo ? 'bold' : 'normal'}">
+                        ${alumno.name} ${esYo ? '(Tú)' : ''}
+                    </td>
+                    <td style="padding: 10px;">${alumno.stats.puntos_semanales} XP</td>
+                `;
+                listaUI.appendChild(fila);
+            });
+        } catch (error) {
+            console.error("Error cargando ranking:", error);
+            listaUI.innerHTML = "<tr><td colspan='3'>Error al cargar el ranking.</td></tr>";
+        }
+    }
 }
