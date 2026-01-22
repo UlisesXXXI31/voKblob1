@@ -296,4 +296,6 @@ footer {
         margin-top: 15px;
         margin-right: 10px;
     }
+    .pantalla-oculta { display: none !important; }
+    .pantalla-activa { display: block !important; }
 }
