@@ -10,26 +10,37 @@
 </head>
 <body>
     <div id="app-container" class="pantalla-oculta">
-        <header>
-            <button id="btn-logout" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-                Cerrar Sesión
-            </button>
-            <p id="puntos">Puntos totales: 0</p>
-             <div id="racha-display-container" style="display:flex; align-items:center; font-weight: bold;">
-            Racha:
-            <span id="racha-numero" style="margin-left: 5px;">0</span>
-    
-           <img id="racha-imagen" 
-           src="fire-100.gif" 
-           alt="Racha" 
-           style="width: 20px; height: 20px; margin-left: 5px; visibility: hidden;" 
-           />
-          </div>
-            <button id="btn-reiniciar-puntos">Reiniciar puntos</button>
-            <button id="btn-ver-historial">Ver historial</button>
-            <button id="btn-guardar-puntos">Guardar Puntos</button>
+        <header style="border-bottom: 2px solid #eee; padding-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button id="btn-logout" style="padding: 5px 15px; cursor: pointer;">Cerrar Sesión</button>
+                
+                <!-- SECCIÓN DE ESTADÍSTICAS (Sincronizadas con Vercel) -->
+                <div style="text-align: right;">
+                    <p id="puntos" style="margin: 0; font-weight: bold;">Puntos totales: 0</p>
+                    
+                    <div id="racha-display-container" style="display:flex; align-items:center; justify-content: flex-end; font-weight: bold;">
+                        <span>Racha: </span>
+                        <span id="racha-numero" style="margin-left: 5px; color: #ff5722;">0</span>
+                        <img id="racha-imagen" 
+                             src="fire-100.gif" 
+                             alt="Racha" 
+                             style="width: 20px; height: 20px; margin-left: 5px; visibility: hidden;" />
+                    </div>
+                    
+                    <!-- NUEVO: Visualización de la Liga -->
+                    <p style="margin: 0; font-size: 0.9rem;">🏆 Liga: <span id="liga-nombre" style="color: #ffa000;">Bronce</span></p>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                <button id="btn-ver-historial">Ver historial</button>
+                <!-- El botón de guardar puntos ahora es opcional porque el nuevo app.js guarda automáticamente -->
+                <button id="btn-guardar-puntos" style="display:none;">Sincronizar</button>
+                <button id="btn-reiniciar-puntos" style="font-size: 10px; opacity: 0.6;">Reiniciar sesión</button>
+            </div>
         </header>
 
+        <!-- Pantallas de la aplicación (Se mantienen igual) -->
         <section id="pantalla-lecciones" class="pantalla pantalla-oculta">
             <h2>Selecciona una lección</h2>
             <div id="lecciones-container" class="grid"></div>
@@ -44,8 +55,10 @@
         <section id="pantalla-actividad" class="pantalla pantalla-oculta">
             <h2 id="titulo-actividad"></h2>
             <div id="actividad-juego"></div>
-            <button id="btn-volver-lecciones" class="btn-volver">Volver a Lecciones</button>
-            <button class="btn-volver" id="btn-volver-actividades">Volver a actividades</button>
+            <div style="margin-top: 20px;">
+                <button id="btn-volver-lecciones" class="btn-volver">Volver a Lecciones</button>
+                <button class="btn-volver" id="btn-volver-actividades">Volver a actividades</button>
+            </div>
             <div id="mensaje-feedback" style="font-weight:bold; text-align:center; margin-top:1rem;"></div>
         </section>
 
@@ -65,8 +78,8 @@
         </div>
     </div>
 
-    <footer style="text-align:center; margin-top: 30px; font-size: 14px;">
-        by DGR
+    <footer style="text-align:center; margin-top: 30px; font-size: 12px; color: #888;">
+        voKblo by DGR - 2026
     </footer>
 
     <script src="palabras.js"></script>
