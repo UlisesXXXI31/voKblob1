@@ -32,19 +32,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const data = await response.json();
 
+    // 1. Si hay error, lanzamos la excepción para que vaya al catch
     if (!response.ok) {
         throw new Error(data.message || 'Error en el inicio de sesión');
     }
 
-    if (data.user.role === 'student') {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.user.role);
-        localStorage.setItem('userData', JSON.stringify(data.user));
+    // 2. Si llegamos aquí, el login es EXITOSO. 
+    // Guardamos el objeto 'user' completo (que incluye las stats de racha y liga)
+    const user = data.user;
+    
+    localStorage.setItem('role', user.role);
+    localStorage.setItem('userData', JSON.stringify(user));
+
+    // 3. Redirigimos según el rol
+    if (user.role === 'student') {
         window.location.href = 'index.html';
-    } else if (data.user.role === 'teacher') {
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.user.role);
-        localStorage.setItem('userData', JSON.stringify(data.user));
+    } else if (user.role === 'teacher') {
         window.location.href = 'teacher.html';
     }
     // ...
