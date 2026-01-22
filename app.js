@@ -85,8 +85,18 @@ function actualizarInterfazStats() {
 }
 
 async function registrarAcierto(puntosGanados = 1) {
-    sonidoCorrecto.play();
-    
+    if (!usuarioActual) return;
+
+    // Red de seguridad: si stats no existe, lo inicializamos
+    if (!usuarioActual.stats) {
+        usuarioActual.stats = {
+            racha_actual: 0,
+            puntos_totales: 0,
+            puntos_semanales: 0,
+            liga_actual: 'Bronce'
+        };
+    }
+
     const progressData = {
         user: usuarioActual.id || usuarioActual._id,
         lessonName: leccionActual ? leccionActual.nombre : "General",
@@ -103,9 +113,12 @@ async function registrarAcierto(puntosGanados = 1) {
         });
 
         const data = await response.json();
+
         if (response.ok) {
+            // Actualizamos racha y puntos con seguridad
             usuarioActual.stats.racha_actual = data.racha;
-            usuarioActual.stats.puntos_totales += puntosGanados;
+            usuarioActual.stats.puntos_totales = (usuarioActual.stats.puntos_totales || 0) + puntosGanados;
+            
             localStorage.setItem('userData', JSON.stringify(usuarioActual));
             actualizarInterfazStats();
         }
