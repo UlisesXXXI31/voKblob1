@@ -1,5 +1,5 @@
 // app.js
-const API_BASE_URL = 'https://ls-api-b1.vercel.app';
+const API_BASE_URL = 'https://ls-api-b1.vercel.app/api';
 document.addEventListener("DOMContentLoaded", () => {
     // ---- LÓGICA DE AUTENTICACIÓN ----
     const token = localStorage.getItem('token');
