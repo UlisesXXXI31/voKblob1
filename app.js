@@ -256,8 +256,203 @@ window.verificarTraducir = () => {
     }
 };
 
-// ... (Incluye aquí las funciones de Elección Múltiple, Escuchar, Emparejar y Pronunciación que te pasé anteriormente)
-// Solo asegúrate de que usen registrarAciertoTemporal() cuando el alumno acierte.
+// ELECCIÓN MÚLTIPLE
+function iniciarEleccionMultiple() {
+    eleccionPalabras = [...leccionActual.palabras].sort(() => Math.random() - 0.5);
+    eleccionIndice = 0;
+    mostrarEleccion();
+}
+
+function mostrarEleccion() {
+    const juego = document.getElementById("actividad-juego");
+    if (eleccionIndice >= eleccionPalabras.length) {
+        juego.innerHTML = "<h3>¡Completado!</h3>";
+        return;
+    }
+    const p = eleccionPalabras[eleccionIndice];
+    const opciones = [p.espanol];
+    while(opciones.length < 4) {
+        let azar = leccionActual.palabras[Math.floor(Math.random()*leccionActual.palabras.length)].espanol;
+        if(!opciones.includes(azar)) opciones.push(azar);
+    }
+    opciones.sort(() => Math.random() - 0.5);
+    juego.innerHTML = `<p>¿Qué significa <strong>${p.aleman}</strong>?</p>`;
+    opciones.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.className = "btn-opcion";
+        btn.onclick = () => {
+            if(opt === p.espanol) {
+                registrarAcierto(1);
+                eleccionIndice++;
+                mostrarEleccion();
+            } else {
+                sonidoIncorrecto.play();
+            }
+        };
+        juego.appendChild(btn);
+    });
+}
+
+// ESCUCHAR
+function iniciarEscuchar() {
+    escucharPalabras = [...leccionActual.palabras].sort(() => Math.random() - 0.5);
+    escucharIndice = 0;
+    mostrarEscuchar();
+}
+
+function mostrarEscuchar() {
+    const juego = document.getElementById("actividad-juego");
+    if (escucharIndice >= escucharPalabras.length) {
+        juego.innerHTML = "<h3>¡Completado!</h3>";
+        return;
+    }
+    const p = escucharPalabras[escucharIndice];
+    juego.innerHTML = `
+        <button onclick="reproducir('${p.aleman}')">🔊 Escuchar</button>
+        <input type="text" id="input-escuchar" placeholder="Escribe en alemán">
+        <button onclick="verificarEscuchar()">Verificar</button>
+    `;
+}
+
+window.reproducir = (txt) => {
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = 'de-DE';
+    window.speechSynthesis.speak(u);
+};
+
+window.verificarEscuchar = () => {
+    const res = document.getElementById("input-escuchar").value.trim().toLowerCase();
+    const correcta = escucharPalabras[escucharIndice].aleman.toLowerCase();
+    if(res === correcta) {
+        registrarAcierto(1);
+        escucharIndice++;
+        mostrarEscuchar();
+    } else {
+        sonidoIncorrecto.play();
+    }
+};
+
+// EMPAREJAR
+function iniciarEmparejar() {
+    emparejarBloque = 0;
+    cargarBloqueEmparejar();
+}
+
+function cargarBloqueEmparejar() {
+    const juego = document.getElementById("actividad-juego");
+    juego.innerHTML = '<div id="col-aleman"></div><div id="col-espanol"></div>';
+    const inicio = emparejarBloque * BLOQUE_TAMANIO;
+    const fin = Math.min(inicio + BLOQUE_TAMANIO, leccionActual.palabras.length);
+    bloquePalabrasActual = leccionActual.palabras.slice(inicio, fin);
+    if (bloquePalabrasActual.length === 0) {
+        juego.innerHTML = "<h3>¡Completado!</h3>";
+        return;
+    }
+    const alemanas = [...bloquePalabrasActual].sort(() => Math.random() - 0.5);
+    const espanolas = [...bloquePalabrasActual].sort(() => Math.random() - 0.5);
+    alemanas.forEach(p => crearBotonEmparejar(p.aleman, "aleman", "col-aleman"));
+    espanolas.forEach(p => crearBotonEmparejar(p.espanol, "espanol", "col-espanol"));
+}
+
+function crearBotonEmparejar(texto, tipo, colId) {
+    const btn = document.createElement("button");
+    btn.textContent = texto;
+    btn.className = "btn-palabra";
+    btn.onclick = () => {
+        if (btn.classList.contains("acertada")) return;
+        btn.classList.toggle("seleccionada");
+        emparejarSeleccionados.push({texto, tipo, btn});
+        if (emparejarSeleccionados.length === 2) verificarPareja();
+    };
+    document.getElementById(colId).appendChild(btn);
+}
+
+function verificarPareja() {
+    const [s1, s2] = emparejarSeleccionados;
+    const esCorrecto = bloquePalabrasActual.some(p => 
+        (p.aleman === s1.texto && p.espanol === s2.texto) || (p.espanol === s1.texto && p.aleman === s2.texto)
+    );
+    if (esCorrecto && s1.tipo !== s2.tipo) {
+        registrarAcierto(1);
+        s1.btn.classList.add("acertada");
+        s2.btn.classList.add("acertada");
+        bloquePalabrasActual = bloquePalabrasActual.filter(p => p.aleman !== s1.texto && p.aleman !== s2.texto);
+        if (bloquePalabrasActual.length === 0) {
+            emparejarBloque++;
+            setTimeout(cargarBloqueEmparejar, 800);
+        }
+    } else {
+        sonidoIncorrecto.play();
+        s1.btn.classList.remove("seleccionada");
+        s2.btn.classList.remove("seleccionada");
+    }
+    emparejarSeleccionados = [];
+}
+
+// PRONUNCIACIÓN
+function iniciarPronunciacion() {
+    pronunciarPalabras = [...leccionActual.palabras].sort(() => Math.random() - 0.5);
+    pronunciarIndice = 0;
+    mostrarPalabraPronunciacion();
+}
+
+function mostrarPalabraPronunciacion() {
+    const juego = document.getElementById("actividad-juego");
+    if (pronunciarIndice >= pronunciarPalabras.length) {
+        juego.innerHTML = "<h3>¡Completado!</h3>";
+        return;
+    }
+    const p = pronunciarPalabras[pronunciarIndice];
+    juego.innerHTML = `
+        <p>Pronuncia: <strong style="font-size:1.5rem;">${p.aleman}</strong></p>
+        <button onclick="reproducir('${p.aleman}')">🔊 Escuchar ejemplo</button>
+        <button id="btn-hablar" style="background:#ff9800; color:white;">🎤 Toca para hablar</button>
+        <div id="feedback-voz"></div>
+    `;
+    document.getElementById("btn-hablar").onclick = () => escucharVoz(p.aleman);
+}
+
+function escucharVoz(palabraCorrecta) {
+    const feedback = document.getElementById("feedback-voz");
+    if (!('webkitSpeechRecognition' in window)) {
+        alert("Navegador no soportado"); return;
+    }
+    const rec = new webkitSpeechRecognition();
+    rec.lang = 'de-DE';
+    feedback.textContent = "Escuchando...";
+    rec.start();
+
+    rec.onresult = (e) => {
+        const trans = e.results[0][0].transcript.toLowerCase();
+        const score = 1 - (levenshtein(trans, palabraCorrecta.toLowerCase()) / Math.max(trans.length, palabraCorrecta.length));
+        
+        if (score > 0.7) {
+            feedback.textContent = "¡Muy bien!";
+            registrarAcierto(1);
+            pronunciarIndice++;
+            setTimeout(mostrarPalabraPronunciacion, 1200);
+        } else {
+            sonidoIncorrecto.play();
+            feedback.textContent = `Dijiste: "${trans}". Intenta de nuevo.`;
+        }
+    };
+    rec.onerror = () => feedback.textContent = "Error al escuchar.";
+}
+
+function levenshtein(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
+            else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+        }
+    }
+    return matrix[b.length][a.length];
+}
+
 
 // RANKING
 async function cargarRanking() {
