@@ -1,11 +1,13 @@
-// app.js - voKblo Sistema Híbrido (Rachas + Panel Profesor)
+// app.js - voKblo Sistema Definitivo (Rachas + Ligas + Panel Profesor)
 const API_BASE_URL = 'https://ls-api-b1.vercel.app/api';
 let usuarioActual = null;
 
-// Variables de Juego
+// Variables de Estado de Juego
 let leccionActual = null;
 let actividadActual = null;
 let puntosEnEstaSesion = 0; 
+
+// Variables de índices para los juegos
 let traducirIndice = 0, traducirPalabras = [];
 let eleccionIndice = 0, eleccionPalabras = [];
 let escucharIndice = 0, escucharPalabras = [];
@@ -20,22 +22,21 @@ const sonidoIncorrecto = new Audio("audios/incorrecto.mp3");
 document.addEventListener("DOMContentLoaded", () => {
     console.log("🚀 App iniciada");
 
-    // 1. Verificación de Usuario
+    // 1. Verificación de Autenticación
     const userDataStr = localStorage.getItem('userData');
     if (!userDataStr) {
-        console.log("⚠️ No hay sesión, redirigiendo a login...");
         window.location.href = 'login.html';
         return;
     }
 
     usuarioActual = JSON.parse(userDataStr);
     
-    // Seguridad para estadísticas
+    // Seguridad: Inicializar stats si no existen
     if (!usuarioActual.stats) {
-        usuarioActual.stats = { racha_actual: 0, puntos_totales: 0, liga_actual: 'Bronce' };
+        usuarioActual.stats = { racha_actual: 0, puntos_totales: 0, liga_actual: 'Bronce', puntos_semanales: 0 };
     }
 
-    // 2. Mostrar Contenedor Principal (Quitar pantalla en blanco)
+    // 2. Mostrar Contenedor
     const appContainer = document.getElementById("app-container");
     if (appContainer) {
         appContainer.classList.remove('pantalla-oculta');
@@ -45,15 +46,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // 3. Inicializar Interfaz
     actualizarInterfazStats();
     mostrarPantalla("pantalla-lecciones");
-    
-    // Verificar si existe el archivo de palabras
     if (typeof datosLecciones !== 'undefined') {
         mostrarLecciones();
-    } else {
-        console.error("❌ Error: No se encuentra 'datosLecciones'. Revisa palabras.js");
     }
 
-    // 4. Configurar Eventos de Botones
+    // 4. Configurar Eventos de Botones Globales
     document.getElementById('btn-logout')?.addEventListener('click', () => {
         localStorage.clear();
         window.location.href = 'login.html';
@@ -66,6 +63,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cargarRanking();
     });
 
+    // Botones de navegación
+    document.getElementById("btn-volver-ranking")?.addEventListener("click", () => mostrarPantalla("pantalla-lecciones"));
     document.getElementById("btn-volver-lecciones")?.addEventListener("click", () => mostrarPantalla("pantalla-lecciones"));
     document.getElementById("btn-volver-actividades")?.addEventListener("click", () => mostrarPantalla("pantalla-actividades"));
     document.getElementById("btn-ir-actividades")?.addEventListener("click", () => {
@@ -73,9 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
         mostrarActividades();
     });
     document.getElementById("btn-volver-lista")?.addEventListener("click", () => mostrarPantalla("pantalla-lecciones"));
+    document.getElementById("btn-salir-historial")?.addEventListener("click", () => mostrarPantalla("pantalla-lecciones"));
+    document.getElementById("btn-ver-historial")?.addEventListener("click", () => mostrarPantalla("pantalla-historial"));
 });
 
-// --- FUNCIONES DE ESTADÍSTICAS ---
+// --- FUNCIONES DE ESTADÍSTICAS Y VERCEL ---
 
 function actualizarInterfazStats() {
     if (!usuarioActual) return;
@@ -92,10 +93,10 @@ function actualizarInterfazStats() {
     if (fuegoImg) fuegoImg.style.visibility = (stats.racha_actual > 0) ? 'visible' : 'hidden';
 }
 
-// Sincronización rápida (Rachas)
-async function registrarAciertoTemporal() {
+// ESTA ES LA FUNCIÓN QUE LLAMAN LOS JUEGOS (registrarAcierto)
+async function registrarAcierto(puntosGanados = 1) {
     sonidoCorrecto.play();
-    puntosEnEstaSesion++;
+    puntosEnEstaSesion += puntosGanados;
 
     try {
         const response = await fetch(`${API_BASE_URL}/progress`, {
@@ -103,7 +104,7 @@ async function registrarAciertoTemporal() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 user: usuarioActual.id || usuarioActual._id,
-                score: 1,
+                score: puntosGanados,
                 lessonName: leccionActual ? leccionActual.nombre : "General",
                 taskName: actividadActual,
                 completed: false
@@ -112,14 +113,13 @@ async function registrarAciertoTemporal() {
         const data = await response.json();
         if (response.ok) {
             usuarioActual.stats.racha_actual = data.racha;
-            usuarioActual.stats.puntos_totales += 1;
+            usuarioActual.stats.puntos_totales += puntosGanados;
             localStorage.setItem('userData', JSON.stringify(usuarioActual));
             actualizarInterfazStats();
         }
-    } catch (e) { console.error("Error racha:", e); }
+    } catch (e) { console.error("Error sincronizando racha:", e); }
 }
 
-// Envío para Panel de Profesor
 async function enviarPuntuacionFinalProfesor() {
     if (puntosEnEstaSesion === 0) {
         alert("No hay puntos nuevos para guardar.");
@@ -128,7 +128,7 @@ async function enviarPuntuacionFinalProfesor() {
     const btn = document.getElementById("btn-guardar-puntos");
     btn.textContent = "Guardando...";
     try {
-        const response = await fetch(`${API_BASE_URL}/progress`, {
+        await fetch(`${API_BASE_URL}/progress`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -139,19 +139,34 @@ async function enviarPuntuacionFinalProfesor() {
                 completed: true 
             })
         });
-        if (response.ok) {
-            alert("✅ ¡Progreso enviado al profesor!");
-            puntosEnEstaSesion = 0;
-        }
+        alert("✅ ¡Progreso enviado! El profesor ya puede verlo.");
+        puntosEnEstaSesion = 0;
     } catch (e) { alert("Error de conexión."); }
     btn.textContent = "Guardar Puntos";
+}
+
+async function cargarRanking() {
+    const liga = usuarioActual.stats.liga_actual || 'Bronce';
+    const listaUI = document.getElementById("lista-ranking");
+    listaUI.innerHTML = "<tr><td colspan='3'>Cargando...</td></tr>";
+    try {
+        const res = await fetch(`${API_BASE_URL}/leaderboard/${liga}`);
+        const ranking = await res.json();
+        listaUI.innerHTML = "";
+        ranking.forEach((al, i) => {
+            const esYo = al.name === usuarioActual.name;
+            const tr = document.createElement("tr");
+            if (esYo) tr.style.backgroundColor = "#fff9c4";
+            tr.innerHTML = `<td style="padding:8px;">${i+1}</td><td>${al.name} ${esYo ? '(Tú)' : ''}</td><td>${al.stats.puntos_semanales} XP</td>`;
+            listaUI.appendChild(tr);
+        });
+    } catch (e) { console.error("Error ranking:", e); }
 }
 
 // --- NAVEGACIÓN ---
 
 function mostrarPantalla(id) {
-    const pantallas = document.querySelectorAll('.pantalla');
-    pantallas.forEach(p => {
+    document.querySelectorAll('.pantalla').forEach(p => {
         p.classList.remove('pantalla-activa');
         p.classList.add('pantalla-oculta');
     });
@@ -207,9 +222,6 @@ function iniciarActividad(id) {
     actividadActual = id;
     document.getElementById("titulo-actividad").textContent = id.toUpperCase();
     mostrarPantalla("pantalla-actividad");
-    const juego = document.getElementById("actividad-juego");
-    juego.innerHTML = "";
-
     if (id === "traducir") iniciarTraducir();
     else if (id === "emparejar") iniciarEmparejar();
     else if (id === "eleccion-multiple") iniciarEleccionMultiple();
@@ -219,6 +231,7 @@ function iniciarActividad(id) {
 
 // --- JUEGOS ---
 
+// TRADUCIR
 function iniciarTraducir() {
     traducirPalabras = [...leccionActual.palabras].sort(() => Math.random() - 0.5);
     traducirIndice = 0;
@@ -228,7 +241,7 @@ function iniciarTraducir() {
 function mostrarPalabraTraducir() {
     const juego = document.getElementById("actividad-juego");
     if (traducirIndice >= traducirPalabras.length) {
-        juego.innerHTML = "<h3>🎉 ¡Lección completada! Dale a Guardar Puntos.</h3>";
+        juego.innerHTML = "<h3>🎉 ¡Completado! Dale a Guardar Puntos.</h3>";
         return;
     }
     const p = traducirPalabras[traducirIndice];
@@ -246,7 +259,9 @@ window.verificarTraducir = () => {
     const feedback = document.getElementById("feedback");
     const correcta = traducirPalabras[traducirIndice].espanol.toLowerCase();
     if (input.value.trim().toLowerCase() === correcta) {
-        registrarAciertoTemporal();
+        feedback.textContent = "¡Correcto!";
+        feedback.style.color = "green";
+        registrarAcierto(1);
         traducirIndice++;
         setTimeout(mostrarPalabraTraducir, 800);
     } else {
@@ -309,13 +324,13 @@ function mostrarEscuchar() {
     }
     const p = escucharPalabras[escucharIndice];
     juego.innerHTML = `
-        <button onclick="reproducir('${p.aleman}')">🔊 Escuchar</button>
+        <button onclick="reproducirVoz('${p.aleman}')">🔊 Escuchar</button>
         <input type="text" id="input-escuchar" placeholder="Escribe en alemán">
         <button onclick="verificarEscuchar()">Verificar</button>
     `;
 }
 
-window.reproducir = (txt) => {
+window.reproducirVoz = (txt) => {
     const u = new SpeechSynthesisUtterance(txt);
     u.lang = 'de-DE';
     window.speechSynthesis.speak(u);
@@ -405,8 +420,7 @@ function mostrarPalabraPronunciacion() {
     }
     const p = pronunciarPalabras[pronunciarIndice];
     juego.innerHTML = `
-        <p>Pronuncia: <strong style="font-size:1.5rem;">${p.aleman}</strong></p>
-        <button onclick="reproducir('${p.aleman}')">🔊 Escuchar ejemplo</button>
+        <p>Pronuncia: <strong>${p.aleman}</strong></p>
         <button id="btn-hablar" style="background:#ff9800; color:white;">🎤 Toca para hablar</button>
         <div id="feedback-voz"></div>
     `;
@@ -422,51 +436,16 @@ function escucharVoz(palabraCorrecta) {
     rec.lang = 'de-DE';
     feedback.textContent = "Escuchando...";
     rec.start();
-
     rec.onresult = (e) => {
         const trans = e.results[0][0].transcript.toLowerCase();
-        const score = 1 - (levenshtein(trans, palabraCorrecta.toLowerCase()) / Math.max(trans.length, palabraCorrecta.length));
-        
-        if (score > 0.7) {
+        if (trans.includes(palabraCorrecta.toLowerCase())) {
             feedback.textContent = "¡Muy bien!";
             registrarAcierto(1);
             pronunciarIndice++;
             setTimeout(mostrarPalabraPronunciacion, 1200);
         } else {
             sonidoIncorrecto.play();
-            feedback.textContent = `Dijiste: "${trans}". Intenta de nuevo.`;
+            feedback.textContent = `Dijiste: "${trans}".`;
         }
     };
-    rec.onerror = () => feedback.textContent = "Error al escuchar.";
-}
-
-function levenshtein(a, b) {
-    const matrix = [];
-    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-    for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-            if (b.charAt(i - 1) === a.charAt(j - 1)) matrix[i][j] = matrix[i - 1][j - 1];
-            else matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-        }
-    }
-    return matrix[b.length][a.length];
-}
-
-
-// RANKING
-async function cargarRanking() {
-    const liga = usuarioActual.stats.liga_actual || 'Bronce';
-    const listaUI = document.getElementById("lista-ranking");
-    try {
-        const res = await fetch(`${API_BASE_URL}/leaderboard/${liga}`);
-        const ranking = await res.json();
-        listaUI.innerHTML = "";
-        ranking.forEach((al, i) => {
-            const esYo = al.name === usuarioActual.name;
-            listaUI.innerHTML += `<tr style="${esYo ? 'background:#fff9c4' : ''}">
-                <td>${i+1}</td><td>${al.name}</td><td>${al.stats.puntos_semanales} XP</td>
-            </tr>`;
-        });
-    } catch (e) { console.error("Error ranking"); }
 }
