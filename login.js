@@ -21,43 +21,44 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
            try {
-    // La función fetch ENVUELVE tanto la URL como el objeto de opciones
-    const response = await fetch('https://ls-api-b1.vercel.app/api/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email: email, password: password })
-    }); // <-- El paréntesis del fetch se cierra aquí, después de todas las opciones.
+            // La función fetch ENVUELVE tanto la URL como el objeto de opciones
+            const response = await fetch('https://ls-api-b1.vercel.app/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: email, password: password })
+            }); // <-- El paréntesis del fetch se cierra aquí, después de todas las opciones.
 
-    const data = await response.json();
+            const data = await response.json();
 
-    // 1. Si hay error, lanzamos la excepción para que vaya al catch
-    if (!response.ok) {
-        throw new Error(data.message || 'Error en el inicio de sesión');
-    }
+            if (!response.ok) {
+                throw new Error(data.message || 'Error en el inicio de sesión');
+            }
 
-    // 2. Si llegamos aquí, el login es EXITOSO. 
-    // Guardamos el objeto 'user' completo (que incluye las stats de racha y liga)
-    const user = data.user;
-    
-    localStorage.setItem('role', user.role);
-    localStorage.setItem('userData', JSON.stringify(user));
+            // --- INTEGRACIÓN DE RACHAS Y ACCESO PROFESOR SIN ELIMINAR TUS BLOQUES ---
 
-    // 3. Redirigimos según el rol
-    if (user.role === 'student') {
-        window.location.href = 'index.html';
-    } else if (user.role === 'teacher') {
-        window.location.href = 'teacher.html';
-    }
-    // ...
-} catch (error) {
-    console.error("Error al iniciar sesión:", error);
-    if (statusMessage) {
-        statusMessage.textContent = error.message;
-        statusMessage.style.color = 'red';
-    }
-}
+            if (data.user.role === 'student') {
+                // Mantenemos tus líneas. Agregamos 'session_activa' por si el token viene vacío (evita rebotes)
+                localStorage.setItem('token', data.token || 'session_activa'); 
+                localStorage.setItem('role', data.user.role);
+                localStorage.setItem('userData', JSON.stringify(data.user)); 
+                window.location.href = 'index.html';
+            } else if (data.user.role === 'teacher') {
+                // Mantenemos tus líneas para el profesor
+                localStorage.setItem('token', data.token || 'session_activa'); 
+                localStorage.setItem('role', data.user.role);
+                localStorage.setItem('userData', JSON.stringify(data.user));
+                window.location.href = 'teacher.html';
+            }
+            // ...
+        } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+            if (statusMessage) {
+                statusMessage.textContent = error.message;
+                statusMessage.style.color = 'red';
+            }
+        }
         });
     }
 });
