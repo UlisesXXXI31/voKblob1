@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnVerHistorial = document.getElementById("btn-ver-historial");
     const btnGuardarPuntos = document.getElementById("btn-guardar-puntos");
     const btnLogout = document.getElementById('btn-logout');
+    const btnIrActividades = document.getElementById("btn-ir-actividades");
 
     // Sonidos (ORIGINALES)
     const sonidoCorrcto = new Audio("audios/correcto.mp3");
