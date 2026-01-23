@@ -10,37 +10,34 @@
 </head>
 <body>
     <div id="app-container" class="pantalla-oculta">
-        <header style="border-bottom: 2px solid #eee; padding-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <button id="btn-logout" style="padding: 5px 15px; cursor: pointer;">Cerrar Sesión</button>
-                
-                <!-- SECCIÓN DE ESTADÍSTICAS (Sincronizadas con Vercel) -->
-                <div style="text-align: right;">
-                    <p id="puntos" style="margin: 0; font-weight: bold;">Puntos totales: 0</p>
-                    
-                    <div id="racha-display-container" style="display:flex; align-items:center; justify-content: flex-end; font-weight: bold;">
-                        <span>Racha: </span>
-                        <span id="racha-numero" style="margin-left: 5px; color: #ff5722;">0</span>
-                        <img id="racha-imagen" 
-                             src="fire-100.gif" 
-                             alt="Racha" 
-                             style="width: 20px; height: 20px; margin-left: 5px; visibility: hidden;" />
-                    </div>
-                    
-                    <!-- NUEVO: Visualización de la Liga -->
-                    <p style="margin: 0; font-size: 0.9rem;">🏆 Liga: <span id="liga-nombre" style="color: #ffa000;">Bronce</span></p>
-                </div>
+       <header>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <button id="btn-logout">Cerrar Sesión</button>
+        
+        <div style="text-align: right;">
+            <p id="puntos" style="font-weight: bold; margin: 0;">Puntos totales: 0</p>
+            <div id="racha-display-container" style="display:flex; align-items:center; justify-content: flex-end;">
+                Racha: <span id="racha-numero" style="margin: 0 5px;">0</span>
+                <img id="racha-imagen" src="fire-100.gif" style="width: 20px; visibility: hidden;" />
             </div>
+            <!-- Nueva línea para la liga -->
+            <p style="margin: 0; font-size: 0.8rem; color: #ffa000;">🏆 Liga: <span id="liga-nombre">Bronce</span></p>
+        </div>
+    </div>
 
-            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-                <button id="btn-ver-historial">Ver historial</button>
-                <button id="btn-ver-ranking">Ver Clasificación 🏆</button>
-                <!-- El botón de guardar puntos ahora es opcional porque el nuevo app.js guarda automáticamente -->
-                <button id="btn-guardar-puntos" style="display:none;">Sincronizar</button>
-                <button id="btn-reiniciar-puntos" style="font-size: 10px; opacity: 0.6;">Reiniciar sesión</button>
-            </div>
-        </header>
-
+    <!-- BOTONES DE ACCIÓN (Asegúrate de que esta parte esté así) -->
+    <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+        <button id="btn-ver-historial">Ver historial</button>
+        <button id="btn-ver-ranking" style="background-color: #ffeb3b; border: 1px solid #fbc02d;">Clasificación 🏆</button>
+        
+        <!-- ESTE ES EL BOTÓN QUE BUSCAMOS -->
+        <button id="btn-guardar-puntos" style="background-color: #4caf50; color: white; font-weight: bold; padding: 10px;">
+            Guardar Puntos (Profesor)
+        </button>
+        
+        <button id="btn-reiniciar-puntos" style="font-size: 10px;">Reiniciar sesión</button>
+    </div>
+</header>
         <!-- Pantallas de la aplicación (Se mantienen igual) -->
         <section id="pantalla-lecciones" class="pantalla pantalla-oculta">
             <h2>Selecciona una lección</h2>
