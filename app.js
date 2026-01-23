@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/voKblob1/service-worker.js', { scope: '/voKblo1/' })
+                navigator.serviceWorker.register('/voKblob1/service-worker.js', { scope: '/voKblob1/' })
                 .then(registration => console.log('✅ SW registrado'))
                 .catch(error => console.log('❌ Error SW:', error));
             });
