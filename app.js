@@ -274,4 +274,111 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function mostrarEscuchar() {
         if (escucharIndice >= escucharPalabras.length) {
-            juegoContainer.innerHTML = "<
+            juegoContainer.innerHTML = "<h3>¡Completado!</h3>";
+            return;
+        }
+        const p = escucharPalabras[escucharIndice];
+        juegoContainer.innerHTML = `
+            <button id="btn-oir">🔊 Escuchar</button>
+            <input type="text" id="input-escuchar" placeholder="Escribe en alemán">
+            <button id="btn-ver-esc">Verificar</button>
+        `;
+        document.getElementById("btn-oir").onclick = () => {
+            const u = new SpeechSynthesisUtterance(p.aleman); u.lang = 'de-DE';
+            window.speechSynthesis.speak(u);
+        };
+        document.getElementById("btn-ver-esc").onclick = () => {
+            const res = document.getElementById("input-escuchar").value.trim().toLowerCase();
+            if(res === p.aleman.toLowerCase()) {
+                registrarAcierto(1); escucharIndice++; mostrarEscuchar();
+            } else { sonidoIncorrecto.play(); }
+        };
+    }
+
+    // PRONUNCIACIÓN
+    function iniciarPronunciacion() {
+        pronunciarPalabras = [...leccionActual.palabras].sort(() => Math.random() - 0.5);
+        pronunciarIndice = 0;
+        mostrarPronunciar();
+    }
+
+    function mostrarPronunciar() {
+        if (pronunciarIndice >= pronunciarPalabras.length) {
+            juegoContainer.innerHTML = "<h3>¡Completado!</h3>";
+            return;
+        }
+        const p = pronunciarPalabras[pronunciarIndice];
+        juegoContainer.innerHTML = `
+            <p>Pronuncia: <strong>${p.aleman}</strong></p>
+            <button id="btn-hablar">🎤 Toca para hablar</button>
+            <div id="fb-voz"></div>
+        `;
+        document.getElementById("btn-hablar").onclick = () => {
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'de-DE'; rec.start();
+            rec.onresult = (e) => {
+                const voz = e.results[0][0].transcript.toLowerCase();
+                if(voz.includes(p.aleman.toLowerCase())) {
+                    registrarAcierto(1); pronunciarIndice++; mostrarPronunciar();
+                } else { sonidoIncorrecto.play(); document.getElementById("fb-voz").textContent = "Dijiste: " + voz; }
+            };
+        };
+    }
+
+    // ---- 6. LECCIONES Y NAVEGACIÓN ----
+    function mostrarLecciones() {
+        const container = document.getElementById("lecciones-container");
+        if (!container || typeof datosLecciones === 'undefined') return;
+        container.innerHTML = "";
+        datosLecciones.lecciones.forEach(leccion => {
+            const btn = document.createElement("button");
+            btn.textContent = leccion.nombre; btn.className = "leccion-btn";
+            btn.onclick = () => {
+                leccionActual = leccion;
+                mostrarPantalla("pantalla-lista-palabras");
+                mostrarListaPalabras(leccion);
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    function mostrarListaPalabras(leccion) {
+        document.getElementById("titulo-lista-leccion").textContent = leccion.nombre;
+        const container = document.getElementById("lista-palabras-container");
+        let html = "<table><thead><tr><th>Alemán</th><th>Español</th></tr></thead><tbody>";
+        leccion.palabras.forEach(p => html += `<tr><td>${p.aleman}</td><td>${p.espanol}</td></tr>`);
+        container.innerHTML = html + "</tbody></table>";
+    }
+
+    function mostrarActividades() {
+        const container = document.getElementById("actividades-container");
+        container.innerHTML = "";
+        ["traducir", "emparejar", "eleccion-multiple", "escuchar", "pronunciacion"].forEach(id => {
+            const btn = document.createElement("button");
+            btn.textContent = id.toUpperCase(); btn.className = "actividad-btn";
+            btn.onclick = () => {
+                actividadActual = id;
+                document.getElementById("titulo-actividad").textContent = id.toUpperCase();
+                mostrarPantalla("pantalla-actividad");
+                if (id === "traducir") iniciarTraducir();
+                else if (id === "emparejar") iniciarEmparejar();
+                else if (id === "eleccion-multiple") iniciarEleccionMultiple();
+                else if (id === "escuchar") iniciarEscuchar();
+                else if (id === "pronunciacion") iniciarPronunciacion();
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    // Botones de salida y configuración
+    document.getElementById("btn-logout").onclick = () => { localStorage.clear(); window.location.href="login.html"; };
+    document.getElementById("btn-ver-ranking").onclick = () => { mostrarPantalla("pantalla-ranking"); cargarRanking(); };
+    document.getElementById("btn-volver-ranking").onclick = () => mostrarPantalla("pantalla-lecciones");
+    document.getElementById("btn-volver-lecciones").onclick = () => mostrarPantalla("pantalla-lecciones");
+    document.getElementById("btn-volver-actividades").onclick = () => mostrarPantalla("pantalla-actividades");
+    document.getElementById("btn-ir-actividades").onclick = () => { mostrarPantalla("pantalla-actividades"); mostrarActividades(); };
+    document.getElementById("btn-volver-lista").onclick = () => mostrarPantalla("pantalla-lecciones");
+    document.getElementById("btn-ver-historial").onclick = () => mostrarPantalla("pantalla-historial");
+    document.getElementById("btn-salir-historial").onclick = () => mostrarPantalla("pantalla-lecciones");
+    document.getElementById("btn-guardar-puntos").onclick = enviarPuntuacionFinalProfesor;
+});
