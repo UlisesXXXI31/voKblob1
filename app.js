@@ -131,10 +131,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function actualizarRachaDisplay() {
-        if (rachaNumeroEl) rachaNumeroEl.textContent = userData.stats.racha_actual || 0;
-        if (ligaNombreEl) ligaNombreEl.textContent = userData.stats.liga_actual || 'Bronce';
+        // Añadimos esta línea de seguridad para evitar el error de la consola
+        if (!userData || !userData.stats) return; 
+
+        const stats = userData.stats;
+
+        if (rachaNumeroEl) rachaNumeroEl.textContent = stats.racha_actual || 0;
+        if (ligaNombreEl) ligaNombreEl.textContent = stats.liga_actual || 'Bronce';
         if (rachaImagenEl) {
-            rachaImagenEl.style.visibility = (userData.stats.racha_actual > 0) ? 'visible' : 'hidden';
+            // Usamos stats con seguridad
+            rachaImagenEl.style.visibility = (stats.racha_actual > 0) ? 'visible' : 'hidden';
         }
     }
 
