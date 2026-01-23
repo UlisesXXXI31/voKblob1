@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // --- CONFIGURACIÓN PRINCIPAL ---
     // Define la URL base de tu API desplegada en Vercel
-    const API_BASE_URL = 'https://ls-api-b1.vercel.app';
+    const API_BASE_URL = 'https://ls-api-b1.vercel.app/api';
     // ---------------------------------
 
       // --- VARIABLES GLOBALES PARA DATOS Y BÚSQUEDA ---
