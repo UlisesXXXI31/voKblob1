@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
            try {
     // La función fetch ENVUELVE tanto la URL como el objeto de opciones
-    const response = await fetch('https://ls-api-b1.vercel.app/api/auth/login', {
+    const response = await fetch('https://ls-api-b1.vercel.app/auth/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
