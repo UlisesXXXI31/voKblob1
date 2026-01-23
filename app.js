@@ -1,4 +1,4 @@
-// app.js - voKblo (Original con Integración de Ligas y Ranking)
+// app.js
 const API_BASE_URL = 'https://ls-api-b1.vercel.app/api';
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -12,69 +12,80 @@ document.addEventListener("DOMContentLoaded", () => {
         return; 
     }
 
-    // Cargamos los datos del usuario (que ya traen las stats de racha y liga desde el login)
-    let usuarioActual = JSON.parse(userDataStr);
-    
-    // Seguridad: Si el usuario no tiene stats, las creamos
-    if (!usuarioActual.stats) {
-        usuarioActual.stats = { racha_actual: 0, puntos_totales: 0, liga_actual: 'Bronce', puntos_semanales: 0 };
-    }
+    const userData = JSON.parse(userDataStr);
 
-    // A partir de aquí, el usuario está autenticado como alumno
     const appContainer = document.getElementById("app-container");
     if (appContainer) {
         appContainer.classList.remove('pantalla-oculta');
         appContainer.classList.add('pantalla-activa');
     }
     
-    // ---- VARIABLES GLOBALES (ORIGINALES) ----
+    // ---- VARIABLES GLOBALES Y ELEMENTOS DEL DOM (ORIGINALES) ----
     let puntos = parseInt(localStorage.getItem('puntosTotales')) || 0;
     let puntosUltimaSesion = parseInt(localStorage.getItem('puntosUltimaSesionGuardados')) || 0;
+    let puntosNuevosSesion = 0; // Acumulado para el profesor
     let leccionActual = null;
     let actividadActual = null;
-    let puntosEnEstaSesion = 0; // Para el panel del profesor
 
-    // Elementos del DOM (ORIGINALES + LIGAS)
-    const puntosTexto = document.getElementById("puntos");
-    const rachaNumeroEl = document.getElementById('racha-numero');
-    const rachaImagenEl = document.getElementById('racha-imagen');
-    const ligaNombreEl = document.getElementById('liga-nombre');
-    
+    // Variables de Racha (Ahora sincronizadas con userData)
+    let rachaActual = userData.stats?.racha_actual || 0;
+
+    // Elementos del DOM (ORIGINALES)
+    const pantallaLecciones = document.getElementById("pantalla-lecciones");
+    const pantallaActividades = document.getElementById("pantalla-actividades");
+    const pantallaActividad = document.getElementById("pantalla-actividad");
     const leccionesContainer = document.getElementById("lecciones-container");
     const actividadesContainer = document.getElementById("actividades-container");
     const actividadJuego = document.getElementById("actividad-juego");
     const tituloLeccion = document.getElementById("titulo-leccion");
     const tituloActividad = document.getElementById("titulo-actividad");
+    const puntosTexto = document.getElementById("puntos");
     const btnReiniciarPuntos = document.getElementById("btn-reiniciar-puntos");
     const btnVerHistorial = document.getElementById("btn-ver-historial");
     const btnGuardarPuntos = document.getElementById("btn-guardar-puntos");
-    const btnLogout = document.getElementById('btn-logout');
+    const pantallaListaPalabras = document.getElementById("pantalla-lista-palabras");
+    const listaPalabrasContainer = document.getElementById("lista-palabras-container");
+    const tituloListaLeccion = document.getElementById("titulo-lista-leccion");
     const btnIrActividades = document.getElementById("btn-ir-actividades");
+    const btnVolverLista = document.getElementById("btn-volver-lista");
+    const pantallaHistorial = document.getElementById("pantalla-historial");
+    const contenedorHistorial = document.getElementById("historial-container");
+    const btnSalirHistorial = document.getElementById("btn-salir-historial");
+    const btnVolverLecciones = document.getElementById("btn-volver-lecciones");
+    const btnVolverActividades = document.getElementById("btn-volver-actividades");
+    const btnLogout = document.getElementById('btn-logout');
+
+    // Elementos de Racha y Liga (Nuevos IDs del HTML)
+    const rachaNumeroEl = document.getElementById('racha-numero');
+    const rachaImagenEl = document.getElementById('racha-imagen');
+    const ligaNombreEl = document.getElementById('liga-nombre');
 
     // Sonidos (ORIGINALES)
     const sonidoCorrcto = new Audio("audios/correcto.mp3");
     const sonidoIncorrecto = new Audio("audios/incorrecto.mp3");
 
-    // ---- FUNCIÓN NUEVA: ACTUALIZAR INTERFAZ DE LIGAS ----
-    function actualizarInterfazLigas() {
-        if (!usuarioActual.stats) return;
-        if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
-        if (rachaNumeroEl) rachaNumeroEl.textContent = usuarioActual.stats.racha_actual || 0;
-        if (ligaNombreEl) ligaNombreEl.textContent = usuarioActual.stats.liga_actual || 'Bronce';
-        if (rachaImagenEl) {
-            rachaImagenEl.style.visibility = (usuarioActual.stats.racha_actual > 0) ? 'visible' : 'hidden';
+    // ---- REGISTRO SERVICE WORKER (ORIGINAL) ----
+    function registerServiceWorker() {
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/voKblob1/service-worker.js', { scope: '/voKblo1/' })
+                .then(registration => console.log('✅ SW registrado'))
+                .catch(error => console.log('❌ Error SW:', error));
+            });
         }
     }
-    actualizarInterfazLigas();
+    registerServiceWorker();
 
-    // ---- FUNCIÓN NUEVA: REGISTRAR ACIERTO EN SERVIDOR (RACHA) ----
-    async function registrarAciertoServidor(pts = 1) {
+    // ---- FUNCIONES DE SINCRONIZACIÓN VERCEL ----
+
+    async function sincronizarAcierto(pts = 1) {
+        puntosNuevosSesion += pts;
         try {
             const response = await fetch(`${API_BASE_URL}/progress`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    user: usuarioActual.id || usuarioActual._id,
+                    user: userData.id || userData._id,
                     score: pts,
                     lessonName: leccionActual ? leccionActual.nombre : "General",
                     taskName: actividadActual,
@@ -83,76 +94,15 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             const data = await response.json();
             if (response.ok) {
-                usuarioActual.stats.racha_actual = data.racha;
-                localStorage.setItem('userData', JSON.stringify(usuarioActual));
-                actualizarInterfazLigas();
+                // Actualizamos racha y liga desde el servidor
+                userData.stats.racha_actual = data.racha;
+                localStorage.setItem('userData', JSON.stringify(userData));
+                actualizarRachaDisplay();
             }
-        } catch (e) { console.error("Error sincronizando racha:", e); }
+        } catch (e) { console.error("Error sincronizando:", e); }
     }
 
-    // ---- FUNCIÓN NUEVA: GUARDAR PUNTOS PARA PROFESOR ----
-    async function guardarPuntuacionEnHistorial() {
-        if (puntosEnEstaSesion === 0) {
-            alert("No hay puntos nuevos para guardar.");
-            return;
-        }
-        btnGuardarPuntos.textContent = "Guardando...";
-        try {
-            await fetch(`${API_BASE_URL}/progress`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    user: usuarioActual.id || usuarioActual._id,
-                    score: 0,
-                    lessonName: leccionActual ? leccionActual.nombre : "Lección",
-                    taskName: actividadActual || "Actividad",
-                    completed: true 
-                })
-            });
-            alert("✅ ¡Progreso enviado al profesor!");
-            puntosEnEstaSesion = 0;
-        } catch (e) { alert("Error al guardar."); }
-        btnGuardarPuntos.textContent = "Guardar Puntos";
-    }
-
-    // ---- RANKING / CLASIFICACIÓN ----
-    async function cargarRanking() {
-        const liga = usuarioActual.stats.liga_actual || 'Bronce';
-        const listaUI = document.getElementById("lista-ranking");
-        if (!listaUI) return;
-        listaUI.innerHTML = "<tr><td colspan='3'>Cargando...</td></tr>";
-        try {
-            const res = await fetch(`${API_BASE_URL}/leaderboard/${liga}`);
-            const ranking = await res.json();
-            listaUI.innerHTML = "";
-            ranking.forEach((al, i) => {
-                const esYo = al.name === usuarioActual.name;
-                listaUI.innerHTML += `<tr style="${esYo ? 'background:#fff9c4' : ''}">
-                    <td>${i+1}</td><td>${al.name} ${esYo ? '(Tú)' : ''}</td><td>${al.stats.puntos_semanales} XP</td>
-                </tr>`;
-            });
-        } catch (e) { console.error("Error ranking:", e); }
-    }
-
-    document.getElementById("btn-ver-ranking")?.addEventListener("click", () => {
-        mostrarPantalla("pantalla-ranking");
-        cargarRanking();
-    });
-
-    document.getElementById("btn-volver-ranking")?.addEventListener("click", () => mostrarPantalla("pantalla-lecciones"));
-
-    // ---- SERVICE WORKER (ORIGINAL) ----
-    function registerServiceWorker() {
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/vokblob1/service-worker.js', { scope: '/vokblo1/' })
-                .then(reg => console.log('✅ SW ok')).catch(err => console.log('❌ SW error', err));
-            });
-        }
-    }
-    registerServiceWorker();
-
-    // ---- FUNCIONES DE NAVEGACIÓN (ORIGINALES) ----
+    // ---- FUNCIONES DE NAVEGACIÓN Y LÓGICA (ORIGINALES) ----
     function ocultarTodasLasPantallas() {
         document.querySelectorAll('.pantalla').forEach(p => {
             p.classList.remove('pantalla-activa');
@@ -176,7 +126,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --- LECCIONES Y ACTIVIDADES (ORIGINALES) ---
+    function actualizarPuntos() {
+        if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
+    }
+
+    function actualizarRachaDisplay() {
+        if (rachaNumeroEl) rachaNumeroEl.textContent = userData.stats.racha_actual || 0;
+        if (ligaNombreEl) ligaNombreEl.textContent = userData.stats.liga_actual || 'Bronce';
+        if (rachaImagenEl) {
+            rachaImagenEl.style.visibility = (userData.stats.racha_actual > 0) ? 'visible' : 'hidden';
+        }
+    }
+
+    // --- LECCIONES (ORIGINAL) ---
     function mostrarLecciones() {
         if (!leccionesContainer) return;
         leccionesContainer.innerHTML = "";
@@ -184,53 +146,74 @@ document.addEventListener("DOMContentLoaded", () => {
             const btn = document.createElement("button");
             btn.textContent = leccion.nombre;
             btn.className = "leccion-btn";
-            btn.onclick = () => { leccionActual = leccion; mostrarListaPalabras(leccion); };
+            btn.addEventListener("click", () => {
+                leccionActual = leccion;
+                mostrarListaPalabras(leccion);
+            });
             leccionesContainer.appendChild(btn);
         });
     }
 
     function mostrarListaPalabras(leccion) {
         mostrarPantalla("pantalla-lista-palabras");
-        const titulo = document.getElementById("titulo-lista-leccion");
-        const container = document.getElementById("lista-palabras-container");
-        if (titulo) titulo.textContent = `Palabras: ${leccion.nombre}`;
-        if (container) {
-            container.innerHTML = "<table><thead><tr><th>Alemán</th><th>Español</th></tr></thead><tbody>";
-            leccion.palabras.forEach(par => {
-                container.querySelector("tbody").innerHTML += `<tr><td>${par.aleman}</td><td>${par.espanol}</td></tr>`;
-            });
-            container.innerHTML += "</tbody></table>";
-        }
+        if (!pantallaListaPalabras || !listaPalabrasContainer || !tituloListaLeccion) return;
+        tituloListaLeccion.textContent = `Palabras: ${leccion.nombre}`;
+        listaPalabrasContainer.innerHTML = "";
+        const tabla = document.createElement("table");
+        tabla.innerHTML = "<thead><tr><th>Alemán</th><th>Español</th></tr></thead><tbody></tbody>";
+        leccion.palabras.forEach(par => {
+            const fila = document.createElement("tr");
+            fila.innerHTML = `<td>${par.aleman}</td><td>${par.espanol}</td>`;
+            tabla.querySelector("tbody").appendChild(fila);
+        });
+        listaPalabrasContainer.appendChild(tabla);
     }
 
     function mostrarActividades() {
         if (!actividadesContainer) return;
         actividadesContainer.innerHTML = "";
-        ["traducir", "emparejar", "eleccion-multiple", "escuchar", "pronunciacion"].forEach(id => {
+        const actividades = [
+            { id: "traducir", nombre: "Traducir" },
+            { id: "emparejar", nombre: "Emparejar" },
+            { id: "eleccion-multiple", nombre: "Elección múltiple" },
+            { id: "escuchar", nombre: "Escuchar" },
+            { id: "pronunciacion", nombre: "Pronunciación" }
+        ];
+        actividades.forEach(act => {
             const btn = document.createElement("button");
-            btn.textContent = id.replace("-", " ").toUpperCase();
+            btn.textContent = act.nombre;
             btn.className = "actividad-btn";
-            btn.onclick = () => iniciarActividad(id);
+            btn.addEventListener("click", () => iniciarActividad(act.id));
             actividadesContainer.appendChild(btn);
         });
     }
 
-    function iniciarActividad(id) {
-        actividadActual = id;
-        document.getElementById("titulo-actividad").textContent = id.toUpperCase();
-        mostrarPantalla("pantalla-actividad");
-        if (id === "traducir") iniciarTraducir();
-        else if (id === "emparejar") iniciarEmparejar();
-        else if (id === "eleccion-multiple") iniciarEleccionMultiple();
-        else if (id === "escuchar") iniciarEscuchar();
-        else if (id === "pronunciacion") iniciarPronunciar(leccionActual);
+    // --- RANKING / MARCADORES (NUEVO) ---
+    async function cargarRanking() {
+        const liga = userData.stats?.liga_actual || 'Bronce';
+        const listaUI = document.getElementById("lista-ranking");
+        if (!listaUI) return;
+        listaUI.innerHTML = "<tr><td colspan='3'>Cargando...</td></tr>";
+        try {
+            const res = await fetch(`${API_BASE_URL}/leaderboard/${liga}`);
+            const ranking = await res.json();
+            listaUI.innerHTML = "";
+            ranking.forEach((al, i) => {
+                const esYo = al.name === userData.name;
+                listaUI.innerHTML += `<tr style="${esYo ? 'background:#fff9c4' : ''}">
+                    <td>${i+1}</td><td>${al.name} ${esYo ? '(Tú)' : ''}</td><td>${al.stats.puntos_semanales} XP</td>
+                </tr>`;
+            });
+        } catch (e) { console.error("Error ranking"); }
     }
 
-    // --- LÓGICA DE JUEGOS (ORIGINAL + INYECCIÓN) ---
+    document.getElementById("btn-ver-ranking")?.addEventListener("click", () => {
+        mostrarPantalla("pantalla-ranking");
+        cargarRanking();
+    });
+    document.getElementById("btn-volver-ranking")?.addEventListener("click", () => mostrarPantalla("pantalla-lecciones"));
 
-    function actualizarPuntos() {
-        if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
-    }
+    // --- LÓGICA DE JUEGOS (ORIGINAL + INTEGRACIÓN) ---
 
     // 1. TRADUCIR
     let traducirPalabras = [], traducirIndice = 0;
@@ -240,40 +223,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     function mostrarPalabraTraducir() {
         if (traducirIndice >= traducirPalabras.length) {
-            actividadJuego.innerHTML = "<p>¡Has terminado!</p>"; return;
+            actividadJuego.innerHTML = "Terminado. Dale a Guardar."; return;
         }
         const p = traducirPalabras[traducirIndice];
         actividadJuego.innerHTML = `
-            <p><strong>Alemán:</strong> ${p.aleman}</p>
+            <p><strong>${p.aleman}</strong></p>
             <input type="text" id="input-traducir" autocomplete="off">
-            <button onclick="verificarTraducir()">Verificar</button>
+            <button id="btn-verificar">Verificar</button>
             <div id="mensaje-feedback"></div>
         `;
-        document.getElementById("input-traducir").focus();
+        document.getElementById("btn-verificar").onclick = () => {
+            const val = document.getElementById("input-traducir").value.trim().toLowerCase();
+            if (val === p.espanol.toLowerCase()) {
+                sonidoCorrcto.play(); puntos++; 
+                sincronizarAcierto(1);
+                traducirIndice++; actualizarPuntos();
+                localStorage.setItem('puntosTotales', puntos.toString());
+                setTimeout(mostrarPalabraTraducir, 1000);
+            } else { sonidoIncorrecto.play(); }
+        };
     }
-    window.verificarTraducir = () => {
-        const input = document.getElementById("input-traducir");
-        const feedback = document.getElementById("mensaje-feedback");
-        const correcta = traducirPalabras[traducirIndice].espanol.toLowerCase();
-        if (input.value.trim().toLowerCase() === correcta) {
-            feedback.textContent = "¡Correcto!";
-            sonidoCorrcto.play();
-            puntos++; puntosEnEstaSesion++;
-            registrarAciertoServidor(1);
-            traducirIndice++; actualizarPuntos();
-            localStorage.setItem('puntosTotales', puntos.toString());
-            setTimeout(mostrarPalabraTraducir, 1000);
-        } else {
-            sonidoIncorrecto.play(); feedback.textContent = `Error: era ${correcta}`;
-            puntos = Math.max(0, puntos - 1); actualizarPuntos();
-        }
-    };
 
     // 2. EMPAREJAR
-    let emparejarPalabras = [], emparejarSeleccionados = [], emparejarBloque = 0, bloquePalabrasActual = [];
+    let emparejarPalabras = [], emparejarBloque = 0, bloquePalabrasActual = [], emparejarSeleccionados = [];
     function iniciarEmparejar() { emparejarPalabras = [...leccionActual.palabras]; emparejarBloque = 0; cargarBloqueEmparejar(); }
     function cargarBloqueEmparejar() {
-        actividadJuego.innerHTML = '<div id="palabras-aleman" class="contenedor-palabras"></div><div id="palabras-espanol" class="contenedor-palabras"></div><div id="mensaje-feedback"></div>';
+        actividadJuego.innerHTML = '<div id="palabras-aleman"></div><div id="palabras-espanol"></div>';
         const inicio = emparejarBloque * BLOQUE_TAMANIO;
         const fin = Math.min(inicio + BLOQUE_TAMANIO, emparejarPalabras.length);
         bloquePalabrasActual = emparejarPalabras.slice(inicio, fin);
@@ -281,102 +256,120 @@ document.addEventListener("DOMContentLoaded", () => {
         const esp = bloquePalabrasActual.map(p => p.espanol).sort(() => Math.random() - 0.5);
         alem.forEach(p => {
             const b = document.createElement("button"); b.textContent = p; b.className = "btn-palabra";
-            b.onclick = () => seleccionarEmparejar("aleman", b, p);
+            b.onclick = () => { if(emparejarSeleccionados.length<2) { b.classList.add("seleccionada"); emparejarSeleccionados.push({t:"aleman", v:p, btn:b}); verificarEmp(); } };
             document.getElementById("palabras-aleman").appendChild(b);
         });
         esp.forEach(p => {
             const b = document.createElement("button"); b.textContent = p; b.className = "btn-palabra";
-            b.onclick = () => seleccionarEmparejar("espanol", b, p);
+            b.onclick = () => { if(emparejarSeleccionados.length<2) { b.classList.add("seleccionada"); emparejarSeleccionados.push({t:"espanol", v:p, btn:b}); verificarEmp(); } };
             document.getElementById("palabras-espanol").appendChild(b);
         });
     }
-    function seleccionarEmparejar(tipo, btn, valor) {
-        if (emparejarSeleccionados.length === 2) return;
-        if (emparejarSeleccionados.find(s => s.tipo === tipo)) return;
-        btn.classList.add("seleccionada");
-        emparejarSeleccionados.push({ tipo, btn, valor });
+    function verificarEmp() {
         if (emparejarSeleccionados.length === 2) {
             const [s1, s2] = emparejarSeleccionados;
-            const pA = s1.tipo === "aleman" ? s1.valor : s2.valor;
-            const pE = s1.tipo === "espanol" ? s1.valor : s2.valor;
-            const esOk = bloquePalabrasActual.some(p => p.aleman === pA && p.espanol === pE);
+            const esOk = s1.t !== s2.t && bloquePalabrasActual.some(p => (p.aleman===s1.v && p.espanol===s2.v) || (p.aleman===s2.v && p.espanol===s1.v));
             if (esOk) {
-                sonidoCorrcto.play(); puntos++; puntosEnEstaSesion++; registrarAciertoServidor(1);
-                actualizarPuntos(); localStorage.setItem('puntosTotales', puntos.toString());
-                emparejarSeleccionados.forEach(s => { s.btn.style.visibility = "hidden"; });
-                bloquePalabrasActual = bloquePalabrasActual.filter(p => !(p.aleman === pA && p.espanol === pE));
+                sonidoCorrcto.play(); puntos++; sincronizarAcierto(1);
+                s1.btn.style.visibility = "hidden"; s2.btn.style.visibility = "hidden";
+                bloquePalabrasActual = bloquePalabrasActual.filter(p => p.aleman !== (s1.t==="aleman"?s1.v:s2.v));
                 if (bloquePalabrasActual.length === 0) {
-                    emparejarBloque++;
-                    if (emparejarBloque * BLOQUE_TAMANIO >= emparejarPalabras.length) {
-                        actividadJuego.innerHTML = "<p>¡Has terminado!</p>";
-                    } else { setTimeout(cargarBloqueEmparejar, 1000); }
+                    emparejarBloque++; 
+                    if (emparejarBloque * BLOQUE_TAMANIO >= emparejarPalabras.length) actividadJuego.innerHTML = "¡Terminado!";
+                    else setTimeout(cargarBloqueEmparejar, 1000);
                 }
-            } else {
-                sonidoIncorrecto.play(); puntos = Math.max(0, puntos - 1); actualizarPuntos();
-                setTimeout(() => { emparejarSeleccionados.forEach(s => s.btn.classList.remove("seleccionada")); emparejarSeleccionados = []; }, 1000);
-            }
+            } else { sonidoIncorrecto.play(); s1.btn.classList.remove("seleccionada"); s2.btn.classList.remove("seleccionada"); }
             emparejarSeleccionados = [];
         }
     }
 
     // 3. ELECCIÓN MÚLTIPLE
-    let eleccionPalabras = [], eleccionIndice = 0;
-    function iniciarEleccionMultiple() { eleccionPalabras = [...leccionActual.palabras].sort(() => Math.random() - 0.5); eleccionIndice = 0; mostrarPreguntaEleccion(); }
-    function mostrarPreguntaEleccion() {
-        if (eleccionIndice >= eleccionPalabras.length) { actividadJuego.innerHTML = "<p>¡Terminado!</p>"; return; }
-        const p = eleccionPalabras[eleccionIndice];
-        const opciones = [p.espanol, ...leccionActual.palabras.filter(x => x.espanol !== p.espanol).slice(0, 3).map(x => x.espanol)].sort(() => Math.random() - 0.5);
-        actividadJuego.innerHTML = `<p><strong>${p.aleman}</strong></p><div id="opciones"></div><div id="mensaje-feedback"></div>`;
-        opciones.forEach(opt => {
-            const b = document.createElement("button"); b.textContent = opt; b.className = "btn-opcion";
+    let eleccionIndice = 0;
+    function iniciarEleccionMultiple() { eleccionIndice = 0; mostrarEleccion(); }
+    function mostrarEleccion() {
+        const p = leccionActual.palabras[eleccionIndice];
+        if (!p) { actividadJuego.innerHTML = "¡Terminado!"; return; }
+        const opts = [p.espanol, ...leccionActual.palabras.filter(x => x.espanol!==p.espanol).slice(0,3).map(x => x.espanol)].sort(() => Math.random() - 0.5);
+        actividadJuego.innerHTML = `<p><strong>${p.aleman}</strong></p><div id="opts"></div>`;
+        opts.forEach(o => {
+            const b = document.createElement("button"); b.textContent = o; b.className = "btn-opcion";
             b.onclick = () => {
-                if (opt === p.espanol) {
-                    sonidoCorrcto.play(); puntos++; puntosEnEstaSesion++; registrarAciertoServidor(1);
-                    eleccionIndice++; actualizarPuntos(); localStorage.setItem('puntosTotales', puntos.toString());
-                    setTimeout(mostrarPreguntaEleccion, 1000);
-                } else { sonidoIncorrecto.play(); }
+                if (o === p.espanol) { sonidoCorrcto.play(); puntos++; sincronizarAcierto(1); eleccionIndice++; mostrarEleccion(); }
+                else { sonidoIncorrecto.play(); }
             };
-            document.getElementById("opciones").appendChild(b);
+            document.getElementById("opts").appendChild(b);
         });
     }
 
     // 4. ESCUCHAR
-    let escucharPalabras = [], escucharIndice = 0;
-    function iniciarEscuchar() { escucharPalabras = [...leccionActual.palabras].sort(() => Math.random() - 0.5); escucharIndice = 0; mostrarPalabraEscuchar(); }
-    function mostrarPalabraEscuchar() {
-        if (escucharIndice >= escucharPalabras.length) { actividadJuego.innerHTML = "<p>¡Terminado!</p>"; return; }
-        const p = escucharPalabras[escucharIndice];
-        actividadJuego.innerHTML = `<button onclick="window.reproducir('${p.aleman}')">🔊 Escuchar</button><input type="text" id="input-escuchar"><button onclick="verificarEscuchar()">Verificar</button>`;
-    }
-    window.reproducir = (txt) => { const u = new SpeechSynthesisUtterance(txt); u.lang = 'de-DE'; window.speechSynthesis.speak(u); };
-    window.verificarEscuchar = () => {
-        const res = document.getElementById("input-escuchar").value.trim().toLowerCase();
-        const correcta = escucharPalabras[escucharIndice].aleman.toLowerCase();
-        if (res === correcta) { sonidoCorrcto.play(); puntos++; puntosEnEstaSesion++; registrarAciertoServidor(1); escucharIndice++; actualizarPuntos(); mostrarPalabraEscuchar(); }
-        else { sonidoIncorrecto.play(); }
-    };
-
-    // 5. PRONUNCIACIÓN
-    let palabrasPronunciacion = [], indicePalabraActual = 0;
-    function iniciarPronunciar(leccion) { palabrasPronunciacion = leccion.palabras.map(p => p.aleman).sort(() => Math.random() - 0.5); indicePalabraActual = 0; mostrarPalabraPronunciacion(); }
-    function mostrarPalabraPronunciacion() {
-        if (indicePalabraActual >= palabrasPronunciacion.length) { actividadJuego.innerHTML = "<p>¡Terminado!</p>"; return; }
-        const p = palabrasPronunciacion[indicePalabraActual];
-        actividadJuego.innerHTML = `<h3>${p}</h3><button onclick="window.reproducir('${p}')">Escuchar</button><button id="btn-pronunciar">Pronunciar</button><p id="feedback-pronunciacion"></p>`;
-        document.getElementById("btn-pronunciar").onclick = () => iniciarReconocimientoVoz(p);
-    }
-    function iniciarReconocimientoVoz(correcta) {
-        const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)(); rec.lang = 'de-DE'; rec.start();
-        rec.onresult = (e) => {
-            const voz = e.results[0][0].transcript.toLowerCase();
-            if (voz.includes(correcta.toLowerCase())) {
-                sonidoCorrcto.play(); puntos++; puntosEnEstaSesion++; registrarAciertoServidor(1);
-                indicePalabraActual++; actualizarPuntos(); setTimeout(mostrarPalabraPronunciacion, 1000);
+    let escucharIndice = 0;
+    function iniciarEscuchar() { escucharIndice = 0; mostrarEscuchar(); }
+    function mostrarEscuchar() {
+        const p = leccionActual.palabras[escucharIndice];
+        if (!p) { actividadJuego.innerHTML = "¡Terminado!"; return; }
+        actividadJuego.innerHTML = `<button onclick="window.reproducir('${p.aleman}')">🔊</button><input type="text" id="in-esc"><button id="btn-esc">Ok</button>`;
+        document.getElementById("btn-esc").onclick = () => {
+            if (document.getElementById("in-esc").value.trim().toLowerCase() === p.aleman.toLowerCase()) {
+                sonidoCorrcto.play(); puntos++; sincronizarAcierto(1); escucharIndice++; mostrarEscuchar();
             } else { sonidoIncorrecto.play(); }
         };
     }
+    window.reproducir = (t) => { const u = new SpeechSynthesisUtterance(t); u.lang = 'de-DE'; speechSynthesis.speak(u); };
 
-    // BOTONES DE ACCIÓN (ORIGINALES)
+    // 5. PRONUNCIACIÓN
+    let pronIndice = 0;
+    function iniciarPronunciacion() { pronIndice = 0; mostrarPron(); }
+    function mostrarPron() {
+        const p = leccionActual.palabras[pronIndice];
+        if (!p) { actividadJuego.innerHTML = "¡Terminado!"; return; }
+        actividadJuego.innerHTML = `<p>${p.aleman}</p><button id="btn-hablar">🎤</button>`;
+        document.getElementById("btn-hablar").onclick = () => {
+            const rec = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            rec.lang = 'de-DE'; rec.start();
+            rec.onresult = (e) => {
+                if (e.results[0][0].transcript.toLowerCase().includes(p.aleman.toLowerCase())) {
+                    sonidoCorrcto.play(); puntos++; sincronizarAcierto(1); pronIndice++; mostrarPron();
+                } else { sonidoIncorrecto.play(); }
+            };
+        };
+    }
+
+    // ---- GUARDAR PARA PROFESOR (Sustituye tu guardarPuntuacionEnHistorial) ----
+    async function guardarPuntuacionEnHistorial() {
+        if (puntosNuevosSesion === 0) return alert("Nada nuevo que guardar.");
+        btnGuardarPuntos.textContent = "...";
+        try {
+            await fetch(`${API_BASE_URL}/progress`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user: userData.id || userData._id,
+                    score: 0,
+                    lessonName: leccionActual ? leccionActual.nombre : "Lección",
+                    taskName: actividadActual,
+                    completed: true 
+                })
+            });
+            alert("✅ Guardado");
+            puntosNuevosSesion = 0;
+            localStorage.setItem('puntosTotales', puntos.toString());
+            localStorage.setItem('puntosUltimaSesionGuardados', puntos.toString());
+        } catch (e) { alert("Error"); }
+        btnGuardarPuntos.textContent = "Guardar Puntos";
+    }
+
+    function iniciarActividad(id) {
+        actividadActual = id;
+        tituloActividad.textContent = id.toUpperCase();
+        mostrarPantalla("pantalla-actividad");
+        if (id === "traducir") iniciarTraducir();
+        else if (id === "emparejar") iniciarEmparejar();
+        else if (id === "eleccion-multiple") iniciarEleccionMultiple();
+        else if (id === "escuchar") iniciarEscuchar();
+        else if (id === "pronunciacion") iniciarPronunciacion();
+    }
+
+    // BOTONES NAVEGACIÓN (ORIGINALES)
     if (btnReiniciarPuntos) btnReiniciarPuntos.onclick = () => { puntos = 0; actualizarPuntos(); };
     if (btnIrActividades) btnIrActividades.onclick = () => { mostrarPantalla("pantalla-actividades"); mostrarActividades(); };
     if (btnVolverActividades) btnVolverActividades.onclick = () => mostrarPantalla("pantalla-actividades");
@@ -390,4 +383,5 @@ document.addEventListener("DOMContentLoaded", () => {
     mostrarPantalla("pantalla-lecciones");
     mostrarLecciones();
     actualizarPuntos();
+    actualizarRachaDisplay();
 });
