@@ -406,7 +406,7 @@ if (actividadActual && leccionActual && leccionActual.palabras) {
 
 console.log("Enviando datos de progreso con 'completed' dinámico:", progressData);
 
-        fetch(`${API_BASE_URL}/api/progress`, {
+        fetch(`${API_BASE_URL}/progress`, {
            method: 'POST',
            headers: { 'Content-Type': 'application/json' },
            body: JSON.stringify(progressData)
