@@ -219,7 +219,9 @@ registerServiceWorker();
                 tablaBody.appendChild(tr);
             });
         } else {
-            tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:
+            tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error al conectar con el servidor.</td></tr>';
+    }
+}
 
         
 
