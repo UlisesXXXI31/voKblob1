@@ -301,7 +301,8 @@ if (btnRanking) {
 const btnVolverRanking = document.getElementById('btn-volver-ranking');
 if (btnVolverRanking) {
     btnVolverRanking.addEventListener('click', () => {
-        mostrarPantalla('pantalla-principal'); // Cambia 'pantalla-principal' por el ID de tu menú
+        mostrarPantalla('pantalla-lecciones');
+         mostrarLecciones();// Cambia 'pantalla-principal' por el ID de tu menú
     });
 }
      // --- FUNCIONES DE LÓGICA DE RACHA (STREAK) ---
