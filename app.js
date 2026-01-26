@@ -190,7 +190,7 @@ registerServiceWorker();
         if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
     }
     async function mostrarClasificacion() {
-    const leaderboardContainer = document.getElementById('leaderboard-list'); // Ajusta al ID de tu HTML
+    const leaderboardContainer = document.getElementById('lista-ranking'); // Ajusta al ID de tu HTML
     leaderboardContainer.innerHTML = '<p>Cargando clasificación...</p>';
 
     try {
