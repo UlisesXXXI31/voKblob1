@@ -189,41 +189,39 @@ registerServiceWorker();
     function actualizarPuntos() {
         if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
     }
-    async function mostrarRanking() {
+    async function cargarDatosRanking() {
     const tablaBody = document.getElementById('lista-ranking');
     if (!tablaBody) return;
 
-    // Mensaje de carga dentro de la tabla
-    tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando clasificación...</td></tr>';
+    // Ponemos un mensaje de carga
+    tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando...</td></tr>';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/leaderboard`);
-        if (!response.ok) throw new Error("Error al obtener ranking");
-
+        // Usamos la URL que ya verificamos que funciona
+        const response = await fetch('https://ls-api-b1.vercel.app/leaderboard');
         const data = await response.json();
-        tablaBody.innerHTML = ''; // Limpiar tabla
+
+        tablaBody.innerHTML = ''; // Limpiamos el "Cargando..."
 
         if (data.leaderboard && data.leaderboard.length > 0) {
             data.leaderboard.forEach((alumno, index) => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid #eee";
-                
-                // Extraer puntos de forma segura (según vimos en tu JSON)
+                // Sacamos los puntos de stats.points (si existen)
                 const puntos = (alumno.stats && alumno.stats.points) ? alumno.stats.points : 0;
-
+                
+                const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td style="padding: 10px; text-align: center;">${index + 1}</td>
-                    <td style="padding: 10px;">${alumno.name}</td>
-                    <td style="padding: 10px; text-align: center; font-weight: bold;">${puntos} XP</td>
+                    <td style="padding:10px; text-align:center;">${index + 1}</td>
+                    <td style="padding:10px;">${alumno.name}</td>
+                    <td style="padding:10px; text-align:center; font-weight:bold;">${puntos} XP</td>
                 `;
                 tablaBody.appendChild(tr);
             });
         } else {
-            tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay alumnos registrados.</td></tr>';
+            tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay alumnos aún</td></tr>';
         }
     } catch (error) {
-        console.error("Error cargando ranking:", error);
-        tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error al conectar con el servidor.</td></tr>';
+        console.error("Error al cargar ranking:", error);
+        tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error de conexión</td></tr>';
     }
 }
 
@@ -289,22 +287,21 @@ registerServiceWorker();
    // Dentro de tu DOMContentLoaded en app.js
 // --- DENTRO DEL EVENTO DOMContentLoaded ---
 
-// 1. Botón para abrir el ranking (Busca el ID de tu botón principal de ranking)
-const btnAbrirRanking = document.getElementById('btn-ranking'); // <--- Verifica si este es el ID de tu botón
-if (btnAbrirRanking) {
-    btnAbrirRanking.addEventListener('click', () => {
-        // Usamos la función de navegación que tengas (probablemente mostrarPantalla)
-        mostrarPantalla('pantalla-ranking'); 
-        mostrarRanking(); // Llamamos a la función que acabamos de crear
+// 1. Botón para ABRIR el ranking
+// IMPORTANTE: Verifica que en tu HTML el botón tenga id="btn-ranking"
+const btnRanking = document.getElementById('btn-ranking'); 
+if (btnRanking) {
+    btnRanking.addEventListener('click', () => {
+        mostrarPantalla('pantalla-ranking'); // Usa tu función de navegación
+        cargarDatosRanking();               // Llama a la función de cargar datos
     });
 }
 
-// 2. Botón para VOLVER del ranking (ID: btn-volver-ranking)
+// 2. Botón para VOLVER (el que está dentro de la pantalla ranking)
 const btnVolverRanking = document.getElementById('btn-volver-ranking');
 if (btnVolverRanking) {
     btnVolverRanking.addEventListener('click', () => {
-        // Volver a la pantalla principal (ajusta 'pantalla-inicio' al ID de tu menú principal)
-        mostrarPantalla('pantalla-principal'); 
+        mostrarPantalla('pantalla-principal'); // Cambia 'pantalla-principal' por el ID de tu menú
     });
 }
      // --- FUNCIONES DE LÓGICA DE RACHA (STREAK) ---
