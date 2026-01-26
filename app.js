@@ -286,12 +286,24 @@ registerServiceWorker();
             mostrarLecciones();
         });
     }
-    const btnClasificacion = document.getElementById('btn-leaderboard'); // El ID de tu botón en HTML
-if (btnClasificacion) {
-    btnClasificacion.addEventListener('click', () => {
-        // Lógica para mostrar la sección de clasificación y llamar a la función
-        document.getElementById('pantalla-ranking').style.display = 'block';
-        cargarClasificacion();
+   // Dentro de tu DOMContentLoaded en app.js
+const btnLeaderboard = document.getElementById('btn-leaderboard');
+
+if (btnLeaderboard) {
+    btnLeaderboard.addEventListener('click', () => {
+        console.log("¡Botón de clasificación pulsado!"); // Esto debe salir en la consola
+
+        // 1. Forzamos a que la sección sea visible
+        const seccion = document.getElementById('leaderboard-section');
+        if (seccion) {
+            seccion.style.display = 'block';
+            console.log("Mostrando sección de clasificación...");
+        } else {
+            console.error("No se encontró el elemento 'leaderboard-section'");
+        }
+
+        // 2. Llamamos a la función para cargar los datos
+        mostrarClasificacion();
     });
 }
      // --- FUNCIONES DE LÓGICA DE RACHA (STREAK) ---
