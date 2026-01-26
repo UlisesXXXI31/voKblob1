@@ -219,7 +219,11 @@ registerServiceWorker();
                 tablaBody.appendChild(tr);
             });
         } else {
-            tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error al conectar con el servidor.</td></tr>';
+            tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay alumnos registrados.</td></tr>';
+        }
+    } catch (error) {
+        console.error("Error cargando ranking:", error);
+        tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error al conectar con el servidor.</td></tr>';
     }
 }
 
