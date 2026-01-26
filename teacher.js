@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function fetchAndStoreStudents() {
         try {
             alumnosContainer.innerHTML = '<p>Cargando lista de alumnos...</p>';
-            const response = await fetch(`${API_BASE_URL}/api/users`, {
+            const response = await fetch(`${API_BASE_URL}/users`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         progressHistoryContainer.innerHTML = '<p>Cargando historial de progreso...</p>';
         
         try {
-            const response = await fetch(`${API_BASE_URL}/api/progress/${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/progress/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/register`, {
+            const response = await fetch(`${API_BASE_URL}/users/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/register`, {
+            const response = await fetch(`${API_BASE_URL}/users/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
