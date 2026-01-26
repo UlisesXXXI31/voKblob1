@@ -390,112 +390,90 @@ function actualizarRacha() {
 }
 // ---------------------------------------------
 
-  // Funciones de historial y API
-    function guardarPuntuacionEnHistorial() {
-        console.log("Dentro de guardarPuntuacionEnHistorial()...");
-        const userData = JSON.parse(localStorage.getItem('userData'));
-        if (!userData || !userData.id) {
-            console.error("Error: No se pudo guardar el progreso. Usuario no autenticado.");
-            const correo = localStorage.getItem("correoAlumno") || "Sin correo";
-            const historial = JSON.parse(localStorage.getItem("historialPuntos")) || [];
-            const puntosSesion = puntos - puntosUltimaSesion;
-            if (puntosSesion > 0) {
-                historial.push({
-                    fecha: new Date().toLocaleString(),
-                    leccion: leccionActual ? leccionActual.nombre : "Sin lección",
-                    actividad: actividadActual || "Sin actividad",
-                    puntos: puntosSesion,
-                    correo: correo
-                });
-                localStorage.setItem("historialPuntos", JSON.stringify(historial));
-            }
-            puntosUltimaSesion = puntos;
-            localStorage.setItem("puntosUltimaSesionGuardados", puntosUltimaSesion.toString());
-           localStorage.setItem('puntosTotales', puntos.toString());
-            return;
-        }
-
-        const puntosSesion = puntos - puntosUltimaSesion;
-        if (puntosSesion <= 0) {
-            puntosUltimaSesion = puntos;
-            localStorage.setItem("puntosUltimaSesionGuardados", puntosUltimaSesion.toString());
-           localStorage.setItem('puntosTotales', puntos.toString());
-            return;
-        }
-        // --- LÓGICA PARA DETERMINAR SI LA ACTIVIDAD FUE COMPLETADA ---
-        let isCompleted = false;
-        // Comprobamos si la actividad tiene preguntas y si el índice actual ha llegado al final
-if (actividadActual && leccionActual && leccionActual.palabras) {
+  function guardarPuntuacionEnHistorial() {
+    console.log("Dentro de guardarPuntuacionEnHistorial()...");
     
-    // La lógica varía según el juego. Aquí un ejemplo para los que usan un índice simple.
-    // Asumimos que los juegos terminan cuando el índice llega al total de palabras.
-    let totalItems = leccionActual.palabras.length;
-    let currentIndex = 0;
+    // 1. Obtener datos del usuario y el TOKEN
+    const userData = JSON.parse(localStorage.getItem('userData'));
+    const token = localStorage.getItem('token'); // <--- ¡IMPORTANTE!
 
-    if (actividadActual === 'traducir') {
-        currentIndex = traducirIndice;
-    } else if (actividadActual === 'eleccion-multiple') {
-        currentIndex = eleccionIndice;
-    } else if (actividadActual === 'escuchar') {
-        currentIndex = escucharIndice;
+    if (!userData || !userData.id || !token) {
+        console.error("Error: No hay sesión activa o falta el ID/Token.");
+        // (Aquí mantienes tu lógica de guardado local por si acaso...)
+        return;
     }
-    // Para 'emparejar', la lógica es cuando se termina el último bloque.
-    else if (actividadActual === 'emparejar') {
-        if (emparejarBloque * BLOQUE_TAMANIO >= totalItems) {
-            isCompleted = true;
-        }
-    }else if (actividadActual === 'pronunciar'){
-        currentIndex = pronunciarIndice;
-    }
+
+    const puntosSesion = puntos - puntosUltimaSesion;
     
-    // Comprobación para los juegos basados en índice
-    if (currentIndex >= totalItems) {
-        isCompleted = true;
+    // Solo enviamos si realmente ha ganado puntos nuevos
+    if (puntosSesion <= 0) {
+        console.log("No hay puntos nuevos para guardar.");
+        return;
     }
-}
 
-       const progressData = {
-    user: userData.id,
-    lessonName: leccionActual.nombre, 
-    taskName: actividadActual,
-    score: puntosSesion,
-    completed: isCompleted // <-- ¡Usamos la variable que acabamos de calcular!
-};
+    // --- LÓGICA DE COMPLETADO (Mantén la que ya tienes) ---
+    let isCompleted = false;
+    if (actividadActual && leccionActual && leccionActual.palabras) {
+        let totalItems = leccionActual.palabras.length;
+        let currentIndex = 0;
+        if (actividadActual === 'traducir') currentIndex = traducirIndice;
+        else if (actividadActual === 'eleccion-multiple') currentIndex = eleccionIndice;
+        else if (actividadActual === 'escuchar') currentIndex = escucharIndice;
+        else if (actividadActual === 'pronunciar') currentIndex = pronunciarIndice;
+        else if (actividadActual === 'emparejar') {
+            if (emparejarBloque * 5 >= totalItems) isCompleted = true;
+        }
+        if (currentIndex >= totalItems) isCompleted = true;
+    }
 
-console.log("Enviando datos de progreso con 'completed' dinámico:", progressData);
+    const progressData = {
+        user: userData.id, // Asegúrate que en el login guardaste 'id' y no '_id'
+        lessonName: leccionActual.nombre, 
+        taskName: actividadActual,
+        score: parseInt(puntosSesion), // Forzamos que sea número
+        completed: isCompleted
+    };
 
-        fetch(`${API_BASE_URL}/progress`, {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify(progressData)
-       })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Error al guardar el progreso en el servidor.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Progreso guardado con éxito en el servidor:", data);
-            })
-            .catch(error => {
-                 console.error('ERROR GRAVE al guardar el progreso en el servidor:', error);
-            });
+    console.log("Enviando a la API:", progressData);
+
+    // 2. PETICIÓN CORREGIDA CON HEADERS DE AUTORIZACIÓN
+    fetch(`${API_BASE_URL}/progress`, {
+        method: 'POST',
+        headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` // <--- ¡CLAVE PARA QUE EL SERVER ACEPTE!
+        },
+        body: JSON.stringify(progressData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw err; });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("¡Puntos actualizados en el servidor!", data);
         
-
-        const historial = JSON.parse(localStorage.getItem("historialPuntos")) || [];
-        historial.push({
-            fecha: new Date().toLocaleString(),
-            leccion: leccionActual ? leccionActual.nombre : "Sin lección",
-            actividad: actividadActual || "Sin actividad",
-            puntos: puntosSesion,
-            correo: userData.email
-        });
-        localStorage.setItem("historialPuntos", JSON.stringify(historial));
+        // Actualizamos las variables locales para no duplicar puntos
         puntosUltimaSesion = puntos;
         localStorage.setItem("puntosUltimaSesionGuardados", puntosUltimaSesion.toString());
         localStorage.setItem('puntosTotales', puntos.toString());
-    }
+    })
+    .catch(error => {
+        console.error('Error al guardar puntos:', error);
+    });
+
+    // Guardado en historial local (opcional, lo que ya tenías)
+    const historial = JSON.parse(localStorage.getItem("historialPuntos")) || [];
+    historial.push({
+        fecha: new Date().toLocaleString(),
+        leccion: leccionActual.nombre,
+        actividad: actividadActual,
+        puntos: puntosSesion,
+        correo: userData.email
+    });
+    localStorage.setItem("historialPuntos", JSON.stringify(historial));
+}
     function mostrarHistorial() {
         const historialContainer = document.getElementById("historial-container");
         if (!historialContainer) return;
