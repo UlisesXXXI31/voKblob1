@@ -1,12 +1,11 @@
-// teacher.js (VERSIÓN CORREGIDA)
+// teacher.js (VERSIÓN FINAL Y UNIFICADA)
 
 document.addEventListener('DOMContentLoaded', async () => {
     // --- CONFIGURACIÓN PRINCIPAL ---
-    // Define la URL base de tu API desplegada en Vercel
     const API_BASE_URL = 'https://ls-api-b1.vercel.app/api';
     // ---------------------------------
 
-      // --- VARIABLES GLOBALES PARA DATOS Y BÚSQUEDA ---
+    // --- VARIABLES GLOBALES PARA DATOS Y BÚSQUEDA ---
     let alumnosGlobalData = []; // Almacena la lista completa de alumnos
     const inputBuscarAlumno = document.getElementById('input-buscar-alumno'); // Nuevo input de búsqueda
     // --------------------------------------------------
@@ -19,11 +18,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // --- REFERENCIAS A ELEMENTOS DEL DOM (Actualizadas para el nuevo HTML) ---
+    // --- REFERENCIAS A ELEMENTOS DEL DOM ---
     // Formularios de Usuario
     const studentForm = document.getElementById('form-add-student');
-    const studentNameInput = document.getElementById('student-name-add'); // Corregido
-    const studentEmailInput = document.getElementById('student-email-add'); // Corregido
+    const studentNameInput = document.getElementById('student-name-add');
+    const studentEmailInput = document.getElementById('student-email-add');
     const teacherForm = document.getElementById('form-add-teacher');
     const teacherNameInput = document.getElementById('teacher-name');
     const teacherEmailInput = document.getElementById('teacher-email');
@@ -33,8 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const teacherStatusMessage = document.getElementById('status-message-teacher');
     
     // Contenedores de Pantalla y Progreso
-    const studentListContainer = document.getElementById('student-list'); // Contenedor padre de la lista
-    const alumnosContainer = document.getElementById('alumnos-container'); // Contenedor donde van las tarjetas
+    const studentListContainer = document.getElementById('student-list');
+    const alumnosContainer = document.getElementById('alumnos-container'); // Contenedor de las tarjetas
     const studentProgressSection = document.getElementById('student-progress');
     const studentNameTitle = document.getElementById('student-name-title');
     const progressHistoryContainer = document.getElementById('progress-history-container');
@@ -43,15 +42,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- FUNCIONES DE NAVEGACIÓN Y RENDERIZADO ---
 
-    // Función de cambio de pantalla (simplificada para usar display: none)
+    // Función de cambio de pantalla (para usar con la clase 'pantalla-oculta' del CSS moderno)
     function mostrarPantalla(id) {
+        // Oculta ambas secciones.
         studentListContainer.classList.add('pantalla-oculta');
         studentProgressSection.classList.add('pantalla-oculta');
 
         const pantalla = document.getElementById(id);
         if (pantalla) {
             pantalla.classList.remove('pantalla-oculta');
-            // Mover el scroll al inicio para evitar que la pantalla quede abajo
+            // Mover el scroll al inicio (IMPORTANTE para la usabilidad)
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
@@ -69,14 +69,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const studentCard = document.createElement('div');
             studentCard.className = 'student-card';
             
-            // Usamos un botón dentro de la tarjeta para el estilo de interacción moderno
             studentCard.innerHTML = `
                 <h3>${user.name}</h3>
                 <p><strong>Email:</strong> ${user.email}</p>
                 <button class="btn-primary">Ver Progreso</button>
             `;
             
-            // Asigna el evento al hacer clic en la tarjeta/botón
+            // Asigna el evento al hacer clic en el botón de la tarjeta
             studentCard.querySelector('button').addEventListener('click', () => {
                 showStudentProgress(user._id, user.name);
             });
@@ -84,14 +83,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Función para obtener los datos y almacenarlos
+    // Función para obtener los datos de la API, ALMACENARLOS y RENDERIZAR la lista
     async function fetchAndStoreStudents() {
         try {
             alumnosContainer.innerHTML = '<p>Cargando lista de alumnos...</p>';
-            const response = await fetch(`${API_BASE_URL}/user`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+            const response = await fetch(`${API_BASE_URL}/api/users`, {
+                headers: { 'Authorization': `Bearer ${token}` }
             });
             
             if (!response.ok) {
@@ -113,7 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-    // Función de filtrado para el input
+    // Función de filtrado para el input de búsqueda
     function filtrarAlumnos() {
         const query = inputBuscarAlumno.value.toLowerCase().trim();
 
@@ -130,12 +127,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderizarAlumnos(filteredData);
     }
     
-    // --- EVENT LISTENERS DE BÚSQUEDA ---
+    // --- LÓGICA DE EVENTOS ---
+
+    // Evento de búsqueda en tiempo real
     if (inputBuscarAlumno) {
         inputBuscarAlumno.addEventListener('input', filtrarAlumnos);
     }
     
-    // --- LÓGICA EXISTENTE ---
+    // Evento del botón para volver a la lista (Usando mostrarPantalla para la animación)
+    btnBackToList.addEventListener('click', () => {
+        mostrarPantalla('student-list');
+    });
 
     // Lógica para cerrar sesión
     if (btnLogout) {
@@ -154,10 +156,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         progressHistoryContainer.innerHTML = '<p>Cargando historial de progreso...</p>';
         
         try {
-            const response = await fetch(`${API_BASE_URL}/progress/${userId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/progress/${userId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
+            // ... (Resto de la lógica de manejo de respuesta y renderizado del historial) ...
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.message || 'Error al obtener el historial de progreso.');
@@ -171,7 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Renderizar la tabla o lista de historial aquí
             const ul = document.createElement('ul');
             data.progress.forEach(entry => {
                  const li = document.createElement('li');
@@ -181,27 +183,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                  ul.appendChild(li);
             });
             progressHistoryContainer.appendChild(ul);
-            
+
         } catch (error) {
             progressHistoryContainer.innerHTML = `<p style="color:red;">${error.message}</p>`;
             console.error("Error:", error);
         }
     }
 
-    // Evento del botón para volver a la lista
-    btnBackToList.addEventListener('click', () => {
-        mostrarPantalla('student-list');
-    });
-
-  // Evento para añadir un nuevo profesor al enviar el formulario
+    // Evento para añadir un nuevo profesor (COMPLETO)
     teacherForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Uso de las referencias correctas del DOM
         const name = teacherNameInput.value; 
         const email = teacherEmailInput.value;
-        const password = generateRandomPassword(); // Función definida en teacher.js
-        const role = document.getElementById('teacher-role').value; // Usar el campo de rol
+        const password = generateRandomPassword(); 
+        const role = document.getElementById('teacher-role').value;
         
         teacherStatusMessage.textContent = "Añadiendo profesor...";
         teacherStatusMessage.style.color = "black";
@@ -213,7 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/users/register`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -229,8 +225,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 teacherStatusMessage.style.color = "green";
                 alert(`¡Importante! La contraseña temporal para ${name} es: ${password}`);
                 teacherForm.reset();
-                // ✅ LLAMADA CLAVE: Actualiza la lista de alumnos
-                await fetchAndStoreStudents(); 
+                await fetchAndStoreStudents(); // Refrescar lista con la nueva función
             } else {
                 teacherStatusMessage.textContent = `Error al añadir profesor: ${data.message}`;
                 teacherStatusMessage.style.color = "red";
@@ -242,15 +237,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Evento para añadir un nuevo alumno al enviar el formulario
+    // Evento para añadir un nuevo alumno (COMPLETO)
     studentForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Uso de las referencias correctas del DOM
         const name = studentNameInput.value; 
         const email = studentEmailInput.value;
-        const password = 'EisA1'; // Contraseña predeterminada
-        const role = document.getElementById('student-role-add').value; // Usar el campo de rol
+        const password = generateRandomPassword(); // Usando la función para generar contraseña para el alumno también (si es necesario)
+        const role = document.getElementById('student-role-add').value;
         
         studentStatusMessage.textContent = "Añadiendo alumno...";
         studentStatusMessage.style.color = "black";
@@ -262,7 +256,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/users/register`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -274,11 +268,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (response.ok) {
+                alert(`¡Importante! La contraseña para ${name} es: ${password}`); // Alerta de contraseña para el alumno
                 studentStatusMessage.textContent = `¡Alumno ${name} añadido con éxito!`;
                 studentStatusMessage.style.color = "green";
                 studentForm.reset();
-                // ✅ LLAMADA CLAVE: Actualiza la lista de alumnos
-                await fetchAndStoreStudents(); 
+                await fetchAndStoreStudents(); // Refrescar lista con la nueva función
             } else {
                 studentStatusMessage.textContent = `Error al añadir alumno: ${data.message}`;
                 studentStatusMessage.style.color = "red";
@@ -301,5 +295,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- INICIO ---
+    // Carga inicial de la lista de alumnos al iniciar la página.
     fetchAndStoreStudents();
 });
