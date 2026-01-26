@@ -189,25 +189,43 @@ registerServiceWorker();
     function actualizarPuntos() {
         if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
     }
-    async function mostrarClasificacion() {
-    const leaderboardContainer = document.getElementById('lista-ranking'); // Ajusta al ID de tu HTML
-    leaderboardContainer.innerHTML = '<p>Cargando clasificación...</p>';
+    async function cargarClasificacion() {
+    const contenedor = document.getElementById('lista-ranking'); // Verifica que este ID exista en tu HTML
+    if (!contenedor) return;
+
+    contenedor.innerHTML = '<p>Cargando clasificación...</p>';
 
     try {
-        // Asegúrate de que API_BASE_URL no tenga el /api al final
-        const response = await fetch(`${API_BASE_URL}/leaderboard`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (!response.ok) throw new Error("No se pudo cargar la clasificación");
+        const response = await fetch(`${API_BASE_URL}/leaderboard`);
+        
+        if (!response.ok) throw new Error("Error al obtener datos");
 
         const data = await response.json();
-        leaderboardContainer.innerHTML = ''; // Limpiar contenedor
+        
+        // Limpiamos el contenedor
+        contenedor.innerHTML = '';
 
-        if (data.leaderboard.length === 0) {
-            leaderboardContainer.innerHTML = '<p>Aún no hay puntuaciones.</p>';
-            return;
-        }
+        // Importante: Usamos data.leaderboard porque así viene en tu JSON
+        data.leaderboard.forEach((alumno, index) => {
+            const div = document.createElement('div');
+            div.className = 'leaderboard-item';
+            
+            // Verificación de seguridad por si no hay puntos todavía
+            const puntos = (alumno.stats && alumno.stats.points) ? alumno.stats.points : 0;
+
+            div.innerHTML = `
+                <span class="puesto">#${index + 1}</span>
+                <span class="nombre">${alumno.name}</span>
+                <span class="puntos">${puntos} pts</span>
+            `;
+            contenedor.appendChild(div);
+        });
+
+    } catch (error) {
+        console.error("Error en leaderboard:", error);
+        contenedor.innerHTML = '<p style="color:red;">Error al cargar la clasificación.</p>';
+    }
+}
 
         // Crear la lista de puestos
         data.leaderboard.forEach((alumno, index) => {
