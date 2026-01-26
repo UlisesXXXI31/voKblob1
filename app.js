@@ -287,7 +287,7 @@ registerServiceWorker();
 if (btnClasificacion) {
     btnClasificacion.addEventListener('click', () => {
         // Lógica para mostrar la sección de clasificación y llamar a la función
-        document.getElementById('seccion-clasificacion').style.display = 'block';
+        document.getElementById('pantalla-ranking').style.display = 'block';
         mostrarClasificacion();
     });
 }
