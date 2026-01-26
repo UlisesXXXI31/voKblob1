@@ -189,6 +189,42 @@ registerServiceWorker();
     function actualizarPuntos() {
         if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
     }
+    async function mostrarClasificacion() {
+    const leaderboardContainer = document.getElementById('leaderboard-list'); // Ajusta al ID de tu HTML
+    leaderboardContainer.innerHTML = '<p>Cargando clasificación...</p>';
+
+    try {
+        // Asegúrate de que API_BASE_URL no tenga el /api al final
+        const response = await fetch(`${API_BASE_URL}/leaderboard`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error("No se pudo cargar la clasificación");
+
+        const data = await response.json();
+        leaderboardContainer.innerHTML = ''; // Limpiar contenedor
+
+        if (data.leaderboard.length === 0) {
+            leaderboardContainer.innerHTML = '<p>Aún no hay puntuaciones.</p>';
+            return;
+        }
+
+        // Crear la lista de puestos
+        data.leaderboard.forEach((alumno, index) => {
+            const item = document.createElement('div');
+            item.className = 'leaderboard-item';
+            item.innerHTML = `
+                <span>${index + 1}. ${alumno.name}</span>
+                <span>${alumno.stats ? alumno.stats.points : 0} pts</span>
+            `;
+            leaderboardContainer.appendChild(item);
+        });
+
+    } catch (error) {
+        leaderboardContainer.innerHTML = '<p style="color:red;">Error al cargar datos.</p>';
+        console.error(error);
+    }
+}
 
     if (btnReiniciarPuntos) {
         btnReiniciarPuntos.addEventListener("click", () => {
@@ -247,6 +283,14 @@ registerServiceWorker();
             mostrarLecciones();
         });
     }
+    const btnClasificacion = document.getElementById('btn-leaderboard'); // El ID de tu botón en HTML
+if (btnClasificacion) {
+    btnClasificacion.addEventListener('click', () => {
+        // Lógica para mostrar la sección de clasificación y llamar a la función
+        document.getElementById('seccion-clasificacion').style.display = 'block';
+        mostrarClasificacion();
+    });
+}
      // --- FUNCIONES DE LÓGICA DE RACHA (STREAK) ---
 function obtenerFechaHoy() {
     return new Date().toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
