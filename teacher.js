@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderizarAlumnos(alumnosGlobalData);
 
         } catch (error) {
-            alumnosContainer.innerHTML = '<p style="color:red;">Error al cargar alumnos: ${error.message}. Asegúrate de que el servidor está funcionando.</p>';
-            console.error("Error:" + error);
+            alumnosContainer.innerHTML = `<p style="color:red;">Error al cargar alumnos: ${error.message}. Asegúrate de que el servidor está funcionando.</p>`;
+            console.error("Error:", error);
         }
     }
     
