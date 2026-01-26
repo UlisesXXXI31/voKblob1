@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         } catch (error) {
             alumnosContainer.innerHTML = `<p style="color:red;">Error al cargar alumnos: ${error.message}. Asegúrate de que el servidor está funcionando.</p>`;
-            console.error("Error:", error);
+            console.error("Error:" + error);
         }
     }
     
