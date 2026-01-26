@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function fetchAndStoreStudents() {
         try {
             alumnosContainer.innerHTML = '<p>Cargando lista de alumnos...</p>';
-            const response = await fetch(`${API_BASE_URL}/users`, {
+            const response = await fetch(`${API_BASE_URL}/user`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
