@@ -189,43 +189,37 @@ registerServiceWorker();
     function actualizarPuntos() {
         if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
     }
-    async function cargarClasificacion() {
-    const contenedor = document.getElementById('lista-ranking'); // Verifica que este ID exista en tu HTML
-    if (!contenedor) return;
+    async function mostrarRanking() {
+    const tablaBody = document.getElementById('lista-ranking');
+    if (!tablaBody) return;
 
-    contenedor.innerHTML = '<p>Cargando clasificación...</p>';
+    // Mensaje de carga dentro de la tabla
+    tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando clasificación...</td></tr>';
 
     try {
         const response = await fetch(`${API_BASE_URL}/leaderboard`);
-        
-        if (!response.ok) throw new Error("Error al obtener datos");
+        if (!response.ok) throw new Error("Error al obtener ranking");
 
         const data = await response.json();
-        
-        // Limpiamos el contenedor
-        contenedor.innerHTML = '';
+        tablaBody.innerHTML = ''; // Limpiar tabla
 
-        // Importante: Usamos data.leaderboard porque así viene en tu JSON
-        data.leaderboard.forEach((alumno, index) => {
-            const div = document.createElement('div');
-            div.className = 'leaderboard-item';
-            
-            // Verificación de seguridad por si no hay puntos todavía
-            const puntos = (alumno.stats && alumno.stats.points) ? alumno.stats.points : 0;
+        if (data.leaderboard && data.leaderboard.length > 0) {
+            data.leaderboard.forEach((alumno, index) => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid #eee";
+                
+                // Extraer puntos de forma segura (según vimos en tu JSON)
+                const puntos = (alumno.stats && alumno.stats.points) ? alumno.stats.points : 0;
 
-            div.innerHTML = `
-                <span class="puesto">#${index + 1}</span>
-                <span class="nombre">${alumno.name}</span>
-                <span class="puntos">${puntos} pts</span>
-            `;
-            contenedor.appendChild(div);
-        });
-
-    } catch (error) {
-        console.error("Error en leaderboard:", error);
-        contenedor.innerHTML = '<p style="color:red;">Error al cargar la clasificación.</p>';
-    }
-}
+                tr.innerHTML = `
+                    <td style="padding: 10px; text-align: center;">${index + 1}</td>
+                    <td style="padding: 10px;">${alumno.name}</td>
+                    <td style="padding: 10px; text-align: center; font-weight: bold;">${puntos} XP</td>
+                `;
+                tablaBody.appendChild(tr);
+            });
+        } else {
+            tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:
 
         
 
@@ -287,23 +281,24 @@ registerServiceWorker();
         });
     }
    // Dentro de tu DOMContentLoaded en app.js
-const btnLeaderboard = document.getElementById('btn-leaderboard');
+// --- DENTRO DEL EVENTO DOMContentLoaded ---
 
-if (btnLeaderboard) {
-    btnLeaderboard.addEventListener('click', () => {
-        console.log("¡Botón de clasificación pulsado!"); // Esto debe salir en la consola
+// 1. Botón para abrir el ranking (Busca el ID de tu botón principal de ranking)
+const btnAbrirRanking = document.getElementById('btn-ranking'); // <--- Verifica si este es el ID de tu botón
+if (btnAbrirRanking) {
+    btnAbrirRanking.addEventListener('click', () => {
+        // Usamos la función de navegación que tengas (probablemente mostrarPantalla)
+        mostrarPantalla('pantalla-ranking'); 
+        mostrarRanking(); // Llamamos a la función que acabamos de crear
+    });
+}
 
-        // 1. Forzamos a que la sección sea visible
-        const seccion = document.getElementById('leaderboard-section');
-        if (seccion) {
-            seccion.style.display = 'block';
-            console.log("Mostrando sección de clasificación...");
-        } else {
-            console.error("No se encontró el elemento 'leaderboard-section'");
-        }
-
-        // 2. Llamamos a la función para cargar los datos
-        mostrarClasificacion();
+// 2. Botón para VOLVER del ranking (ID: btn-volver-ranking)
+const btnVolverRanking = document.getElementById('btn-volver-ranking');
+if (btnVolverRanking) {
+    btnVolverRanking.addEventListener('click', () => {
+        // Volver a la pantalla principal (ajusta 'pantalla-inicio' al ID de tu menú principal)
+        mostrarPantalla('pantalla-principal'); 
     });
 }
      // --- FUNCIONES DE LÓGICA DE RACHA (STREAK) ---
