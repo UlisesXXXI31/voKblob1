@@ -227,22 +227,7 @@ registerServiceWorker();
     }
 }
 
-        // Crear la lista de puestos
-        data.leaderboard.forEach((alumno, index) => {
-            const item = document.createElement('div');
-            item.className = 'leaderboard-item';
-            item.innerHTML = `
-                <span>${index + 1}. ${alumno.name}</span>
-                <span>${alumno.stats ? alumno.stats.points : 0} pts</span>
-            `;
-            leaderboardContainer.appendChild(item);
-        });
-
-    } catch (error) {
-        leaderboardContainer.innerHTML = '<p style="color:red;">Error al cargar datos.</p>';
-        console.error(error);
-    }
-}
+        
 
     if (btnReiniciarPuntos) {
         btnReiniciarPuntos.addEventListener("click", () => {
