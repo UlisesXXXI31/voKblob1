@@ -291,7 +291,7 @@ if (btnClasificacion) {
     btnClasificacion.addEventListener('click', () => {
         // Lógica para mostrar la sección de clasificación y llamar a la función
         document.getElementById('pantalla-ranking').style.display = 'block';
-        mostrarClasificacion();
+        cargarClasificacion();
     });
 }
      // --- FUNCIONES DE LÓGICA DE RACHA (STREAK) ---
