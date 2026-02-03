@@ -413,22 +413,39 @@ function actualizarRacha() {
     }
 
     // --- LÓGICA DE COMPLETADO (Mantén la que ya tienes) ---
+    // --- LÓGICA DE COMPLETADO CORREGIDA ---
     let isCompleted = false;
     if (actividadActual && leccionActual && leccionActual.palabras) {
         let totalItems = leccionActual.palabras.length;
         let currentIndex = 0;
-        if (actividadActual === 'traducir') currentIndex = traducirIndice;
-        else if (actividadActual === 'eleccion-multiple') currentIndex = eleccionIndice;
-        else if (actividadActual === 'escuchar') currentIndex = escucharIndice;
-        else if (actividadActual === 'pronunciar') currentIndex = pronunciarIndice;
-        else if (actividadActual === 'emparejar')
-        else if (actividadActual === 'contexto')
-        {
-            if (emparejarBloque * 5 >= totalItems) isCompleted = true;
-        }
-        if (currentIndex >= totalItems) isCompleted = true;
-    }
 
+        // Asignamos el índice según la actividad
+        if (actividadActual === 'traducir') {
+            currentIndex = traducirIndice;
+        } else if (actividadActual === 'eleccion-multiple') {
+            currentIndex = eleccionIndice;
+        } else if (actividadActual === 'escuchar') {
+            currentIndex = escucharIndice;
+        } else if (actividadActual === 'pronunciar') {
+            currentIndex = indicePalabraActual;
+        } else if (actividadActual === 'contexto') {
+            currentIndex = indiceContexto;
+            // Para el test de contexto, el total no es la lección, sino las 20 del bloque
+            totalItems = palabrasBloque.length; 
+        } else if (actividadActual === 'emparejar') {
+            // Lógica especial para emparejar: usamos el tamaño del bloque (10)
+            if (emparejarBloque * BLOQUE_TAMANIO >= totalItems) {
+                isCompleted = true;
+            }
+        }
+
+        // Para las actividades que usan índice numérico (todas menos emparejar)
+        if (actividadActual !== 'emparejar') {
+            if (currentIndex >= totalItems && totalItems > 0) {
+                isCompleted = true;
+            }
+        }
+    }
     const progressData = {
         user: userData.id, // Asegúrate que en el login guardaste 'id' y no '_id'
         lessonName: leccionActual.nombre, 
