@@ -173,7 +173,7 @@ registerServiceWorker();
             { id: "emparejar", nombre: "Emparejar" },
             { id: "eleccion-multiple", nombre: "Elección múltiple" },
             { id: "escuchar", nombre: "Escuchar" },
-            { id: "pronunciacion", nombre: "Pronunciación" }
+            { id: "pronunciacion", nombre: "Pronunciación" },
             { id: "contexto", nombre: "Test de Contexto (Bloques 20)" } 
         ];
         actividades.forEach(act => {
