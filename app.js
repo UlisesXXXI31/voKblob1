@@ -420,7 +420,9 @@ function actualizarRacha() {
         else if (actividadActual === 'eleccion-multiple') currentIndex = eleccionIndice;
         else if (actividadActual === 'escuchar') currentIndex = escucharIndice;
         else if (actividadActual === 'pronunciar') currentIndex = pronunciarIndice;
-        else if (actividadActual === 'emparejar') {
+        else if (actividadActual === 'emparejar')
+        else if (actividadActual === 'contexto')
+        {
             if (emparejarBloque * 5 >= totalItems) isCompleted = true;
         }
         if (currentIndex >= totalItems) isCompleted = true;
@@ -516,7 +518,9 @@ function actualizarRacha() {
             iniciarEscuchar();
         } else if (idActividad === "pronunciacion") {
             iniciarPronunciar(leccionActual);
-        }
+        }else if (idActividad === "contexto") {
+           iniciarContexto();
+    }
     }
 
     // Código de la actividad "Traducir"
@@ -995,3 +999,104 @@ function seleccionarEmparejar(tipo, btn, valor) {
     mostrarLecciones();
     actualizarPuntos();
 });
+
+// ---- LÓGICA ACTIVIDAD CONTEXTO Y BLOQUES ----
+let palabrasBloque = [];
+let indiceContexto = 0;
+
+function iniciarContexto() {
+    const numBloque = parseInt(document.getElementById("select-bloque").value);
+    const inicio = (numBloque - 1) * 20;
+    const fin = inicio + 20;
+
+    // 1. Filtramos solo las 20 palabras de ese bloque de la lección actual
+    palabrasBloque = leccionActual.palabras.slice(inicio, fin);
+
+    if (palabrasBloque.length === 0) {
+        alert("No hay palabras en este bloque.");
+        return;
+    }
+
+    // 2. Mezclamos el bloque
+    palabrasBloque.sort(() => Math.random() - 0.5);
+    
+    indiceContexto = 0;
+    mostrarPantalla("pantalla-contexto");
+    mostrarPreguntaContexto();
+}
+
+function mostrarPreguntaContexto() {
+    const contenedorFrase = document.getElementById("frase-area");
+    const contenedorOpciones = document.getElementById("opciones-contexto");
+    const progreso = document.getElementById("progreso-contexto");
+    const feedback = document.getElementById("feedback-contexto");
+
+    feedback.textContent = "";
+
+    if (indiceContexto >= palabrasBloque.length) {
+        contenedorFrase.innerHTML = `<h3>¡Test finalizado!</h3><p>Has completado las 20 palabras del bloque.</p>`;
+        contenedorOpciones.innerHTML = "";
+        return;
+    }
+
+    const item = palabrasBloque[indiceContexto];
+    progreso.textContent = `Palabra ${indiceContexto + 1} de ${palabrasBloque.length}`;
+    
+    // Mostramos la frase (Asegúrate de que tus datos tengan la propiedad .frase)
+    contenedorFrase.innerHTML = `<p class="frase-test">${item.frase || "Satz no disponible..."}</p>`;
+
+    // Generar opciones (Correcta + 3 distractores del mismo bloque)
+    let opciones = [item.aleman];
+    let posiblesDistractores = palabrasBloque.filter(p => p.aleman !== item.aleman);
+    
+    // Mezclar distractores y agarrar 3
+    posiblesDistractores.sort(() => Math.random() - 0.5);
+    opciones.push(...posiblesDistractores.slice(0, 3).map(p => p.aleman));
+    
+    // Mezclar las 4 opciones finales
+    opciones.sort(() => Math.random() - 0.5);
+
+    contenedorOpciones.innerHTML = "";
+    opciones.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.className = "btn-opcion-contexto";
+        btn.onclick = () => verificarContexto(opt, item.aleman);
+        contenedorOpciones.appendChild(btn);
+    });
+}
+
+function verificarContexto(seleccion, correcta) {
+    const feedback = document.getElementById("feedback-contexto");
+    const botones = document.querySelectorAll(".btn-opcion-contexto");
+    
+    // Desactivar botones para evitar doble clic
+    botones.forEach(b => b.disabled = true);
+
+    if (seleccion === correcta) {
+        feedback.textContent = "¡Correcto! ✅";
+        feedback.className = "feedback-posito";
+        sonidoCorrcto.play();
+        puntos += 2; // Damos más puntos por ser más difícil
+        actualizarRacha();
+    } else {
+        feedback.textContent = `Incorrecto ❌ La palabra era: ${correcta}`;
+        feedback.className = "feedback-negativo";
+        sonidoIncorrecto.play();
+    }
+
+    actualizarPuntos();
+    localStorage.setItem('puntosTotales', puntos.toString());
+
+    setTimeout(() => {
+        indiceContexto++;
+        mostrarPreguntaContexto();
+    }, 2000);
+}
+
+
+// Botón volver de la pantalla contexto
+document.getElementById("btn-volver-contexto").onclick = () => {
+    mostrarPantalla("pantalla-actividades");
+    mostraActividades();
+};
