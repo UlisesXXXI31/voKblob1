@@ -88,6 +88,31 @@
         <button id="btn-volver-contexto" class="btn-volver">Volver</button>
     </div>
 </section>
+        <section id="pantalla-contexto" class="pantalla pantalla-oculta">
+    <h2>Examen de Vocabulario</h2>
+    
+    <!-- Configuración del Bloque -->
+    <div id="config-test" style="background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+        <p>Elige el bloque de 20 palabras que has estudiado:</p>
+        <select id="select-bloque" style="width: 100%; padding: 10px; margin-bottom: 15px;">
+            <option value="1">Palabras 1 - 20</option>
+            <option value="2">Palabras 21 - 40</option>
+            <option value="3">Palabras 41 - 60</option>
+            <option value="4">Palabras 61 - 80</option>
+        </select>
+        <button id="btn-iniciar-examen" style="background-color: #4caf50; color: white;">Empezar Examen</button>
+    </div>
+
+    <!-- El Juego -->
+    <div id="juego-contexto" class="pantalla-oculta" style="margin-top: 20px;">
+        <p id="info-progreso" style="font-weight: bold;"></p>
+        <div id="frase-pregunta" style="font-size: 1.3rem; padding: 20px; background: white; border: 1px solid #ccc; margin-bottom: 20px;"></div>
+        <div id="opciones-contexto" class="grid"></div>
+        <div id="feedback-contexto" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+    </div>
+
+    <button id="btn-volver-de-contexto" class="btn-volver" style="margin-top: 30px;">Volver</button>
+</section>
 
         <section id="pantalla-lista-palabras" class="pantalla pantalla-oculta">
             <h2 id="titulo-lista-leccion"></h2>
