@@ -1101,3 +1101,92 @@ document.getElementById("btn-volver-contexto").onclick = () => {
     mostrarPantalla("pantalla-actividades");
     mostraActividades();
 };
+
+// VARIABLES PARA EL TEST
+let palabrasDelExamen = [];
+let indicePregunta = 0;
+
+// Escuchar el botón de iniciar examen
+document.getElementById("btn-iniciar-examen").addEventListener("click", () => {
+    const bloque = parseInt(document.getElementById("select-bloque").value);
+    const inicio = (bloque - 1) * 20;
+    const fin = inicio + 20;
+
+    // Filtramos exactamente las 20 palabras de la lección seleccionada
+    palabrasDelExamen = leccionActual.palabras.slice(inicio, fin);
+
+    if (palabrasDelExamen.length === 0) {
+        alert("No hay suficientes palabras en este bloque.");
+        return;
+    }
+
+    // Mezclamos las 20 palabras para que el examen sea aleatorio
+    palabrasDelExamen.sort(() => Math.random() - 0.5);
+    
+    indicePregunta = 0;
+    document.getElementById("config-test").classList.add("pantalla-oculta");
+    document.getElementById("juego-contexto").classList.remove("pantalla-oculta");
+    lanzarPreguntaContexto();
+});
+
+function lanzarPreguntaContexto() {
+    const contenedorFrase = document.getElementById("frase-pregunta");
+    const contenedorOpciones = document.getElementById("opciones-contexto");
+    const progreso = document.getElementById("info-progreso");
+    const feedback = document.getElementById("feedback-contexto");
+
+    feedback.textContent = "";
+
+    if (indicePregunta >= palabrasDelExamen.length) {
+        contenedorFrase.innerHTML = `<div style="text-align:center;"><h3>Examen Finalizado</h3><p>¡Buen trabajo! Enseña esta pantalla al profesor.</p></div>`;
+        contenedorOpciones.innerHTML = "";
+        progreso.textContent = "";
+        return;
+    }
+
+    const item = palabrasDelExamen[indicePregunta];
+    progreso.textContent = `Pregunta ${indicePregunta + 1} de ${palabrasDelExamen.length}`;
+    
+    // Mostramos la frase con el hueco
+    contenedorFrase.textContent = item.frase || "Debes añadir frases en palabras.js...";
+
+    // Generar 4 opciones: La correcta + 3 distractores del MISMO bloque de 20
+    let opciones = [item.aleman];
+    let candidatos = palabrasDelExamen.filter(p => p.aleman !== item.aleman);
+    candidatos.sort(() => Math.random() - 0.5);
+    opciones.push(...candidatos.slice(0, 3).map(p => p.aleman));
+    opciones.sort(() => Math.random() - 0.5);
+
+    contenedorOpciones.innerHTML = "";
+    opciones.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.className = "actividad-btn"; // Usamos tu clase de estilo
+        btn.onclick = () => {
+            if (opt === item.aleman) {
+                feedback.textContent = "¡Correcto! ✅";
+                feedback.style.color = "green";
+                sonidoCorrcto.play();
+                puntos++;
+                actualizarRacha();
+                actualizarPuntos();
+                indicePregunta++;
+                setTimeout(lanzarPreguntaContexto, 1200);
+            } else {
+                feedback.textContent = `Incorrecto ❌ La palabra era: ${item.aleman}`;
+                feedback.style.color = "red";
+                sonidoIncorrecto.play();
+            }
+        };
+        contenedorOpciones.appendChild(btn);
+    });
+}
+
+// Configurar el botón de volver de esta pantalla
+document.getElementById("btn-volver-de-contexto").onclick = () => {
+    document.getElementById("config-test").classList.remove("pantalla-oculta");
+    document.getElementById("juego-contexto").classList.add("pantalla-oculta");
+    mostrarPantalla("pantalla-actividades");
+    mostrarActividades();
+};
+
