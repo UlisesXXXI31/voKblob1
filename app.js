@@ -174,6 +174,7 @@ registerServiceWorker();
             { id: "eleccion-multiple", nombre: "Elección múltiple" },
             { id: "escuchar", nombre: "Escuchar" },
             { id: "pronunciacion", nombre: "Pronunciación" }
+            { id: "contexto", nombre: "Test de Contexto (Bloques 20)" } 
         ];
         actividades.forEach(act => {
             const btn = document.createElement("button");
