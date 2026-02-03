@@ -59,6 +59,35 @@
             </div>
             <div id="mensaje-feedback" style="font-weight:bold; text-align:center; margin-top:1rem;"></div>
         </section>
+        <!-- Nueva sección para el Test de Contexto -->
+<section id="pantalla-contexto" class="pantalla pantalla-oculta">
+    <h2>Test de Contexto</h2>
+    
+    <!-- Selector de Bloque -->
+    <div id="setup-contexto" style="margin-bottom: 20px; background: #f0f0f0; padding: 15px; border-radius: 8px;">
+        <label>Selecciona el bloque de estudio:</label><br>
+        <select id="select-bloque" style="padding: 10px; margin-top: 10px; width: 100%;">
+            <option value="1">Palabras 1 - 20</option>
+            <option value="2">Palabras 21 - 40</option>
+            <option value="3">Palabras 41 - 60</option>
+            <option value="4">Palabras 61 - 80</option>
+        </select>
+        <button id="btn-comenzar-contexto" style="margin-top:10px; background-color: #1976d2; color:white;">
+            Comenzar Examen
+        </button>
+    </div>
+
+    <!-- Área de Juego -->
+    <div id="juego-contexto" class="pantalla-oculta">
+        <p id="progreso-contexto" style="font-weight: bold;"></p>
+        <div id="frase-con-hueco" style="font-size: 1.4rem; margin: 20px 0; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 5px;"></div>
+        <div id="opciones-contexto" class="grid"></div>
+    </div>
+
+    <div style="margin-top: 20px;">
+        <button id="btn-volver-contexto" class="btn-volver">Volver</button>
+    </div>
+</section>
 
         <section id="pantalla-lista-palabras" class="pantalla pantalla-oculta">
             <h2 id="titulo-lista-leccion"></h2>
