@@ -1016,7 +1016,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
     mostrarPantalla("pantalla-lecciones");
     mostrarLecciones();
     actualizarPuntos();
-});
+
 
 // ---- LÓGICA ACTIVIDAD CONTEXTO Y BLOQUES ----
 let palabrasBloque = [];
@@ -1206,4 +1206,4 @@ document.getElementById("btn-volver-de-contexto").onclick = () => {
     mostrarPantalla("pantalla-actividades");
     mostrarActividades();
 };
-
+});
