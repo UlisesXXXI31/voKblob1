@@ -534,7 +534,7 @@ function actualizarRacha() {
             iniciarEleccionMultiple();
         } else if (idActividad === "escuchar") {
             iniciarEscuchar();
-        } else if (idActividad === "pronunciacion") {
+        } else if (idActividad === "pronunciar") {
             iniciarPronunciar(leccionActual);
         }else if (idActividad === "contexto") {
            iniciarContexto();
