@@ -207,7 +207,7 @@ registerServiceWorker();
         if (data.leaderboard && data.leaderboard.length > 0) {
             data.leaderboard.forEach((alumno, index) => {
                 // Sacamos los puntos de stats.points (si existen)
-                const puntos = (alumno.stats && alumno.stats.points) ? alumno.stats.points : 0;
+                const puntos = (alumno.stats && alumno.stats.points !== 'undefined') ? alumno.stats.points : 0;
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -521,7 +521,8 @@ function actualizarRacha() {
                 "emparejar": "Actividad: Emparejar",
                 "eleccion-multiple": "Actividad: Elección múltiple",
                 "escuchar": "Actividad: Escuchar",
-                "pronunciacion": "Actividad: Pronunciación"
+                "pronunciacion": "Actividad: Pronunciación",
+                "contexto": "Actividad: Contexto"
             }[idActividad] || "Actividad";
         }
         if (actividadJuego) actividadJuego.innerHTML = "";
