@@ -1049,7 +1049,7 @@ function mostrarPreguntaContexto() {
     const contenedorOpciones = document.getElementById("opciones-contexto");
     const progreso = document.getElementById("progreso-contexto");
     const feedback = document.getElementById("feedback-contexto");
-    const btnContexto = document.getElementById("btn-comenzar-contexto");
+    const btnComenzarExamen = document.getElementById("btn-comenzar-contexto");
     
     feedback.textContent = "";
 
@@ -1085,8 +1085,8 @@ function mostrarPreguntaContexto() {
         contenedorOpciones.appendChild(btn);
     });
 }
-     if (btnContexto) {
-        btnContexto.addEventListener("click", () => {
+     if (btnComenzarExamen) {
+        btnComenzarExamen.addEventListener("click", () => {
             mostrarPreguntaContexto();
             mostrarPantalla("pantalla-contexto");
         });
