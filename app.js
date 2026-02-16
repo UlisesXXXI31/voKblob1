@@ -1022,6 +1022,8 @@ function seleccionarEmparejar(tipo, btn, valor) {
 // ---- LÓGICA ACTIVIDAD CONTEXTO Y BLOQUES ----
 let palabrasBloque = [];
 let indiceContexto = 0;
+const btnComenzarExamen = document.getElementById("btn-comenzar-contexto");
+
 
 function iniciarContexto() {
     const numBloque = parseInt(document.getElementById("select-bloque").value);
@@ -1049,7 +1051,6 @@ function mostrarPreguntaContexto() {
     const contenedorOpciones = document.getElementById("opciones-contexto");
     const progreso = document.getElementById("progreso-contexto");
     const feedback = document.getElementById("feedback-contexto");
-    const btnComenzarExamen = document.getElementById("btn-comenzar-contexto");
     
     feedback.textContent = "";
 
