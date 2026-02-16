@@ -10,47 +10,45 @@
 </head>
 <body>
     <div id="app-container" class="pantalla-oculta">
-       <header>
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <button id="btn-logout">Cerrar Sesión</button>
-        
-        <div style="text-align: right;">
-            <p id="puntos" style="font-weight: bold; margin: 0;">Puntos totales: 0</p>
-            <div id="racha-display-container" style="display:flex; align-items:center; justify-content: flex-end;">
-                Racha: <span id="racha-numero" style="margin: 0 5px;">0</span>
-                <img id="racha-imagen" src="fire-100.gif" style="width: 20px; visibility: hidden;" />
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button id="btn-logout">Cerrar Sesión</button>
+                
+                <div style="text-align: right;">
+                    <p id="puntos" style="font-weight: bold; margin: 0;">Puntos totales: 0</p>
+                    <div id="racha-display-container" style="display:flex; align-items:center; justify-content: flex-end;">
+                        Racha: <span id="racha-numero" style="margin: 0 5px;">0</span>
+                        <img id="racha-imagen" src="fire-100.gif" style="width: 20px; visibility: hidden;" />
+                    </div>
+                    <p style="margin: 0; font-size: 0.8rem; color: #ffa000;">🏆 Liga: <span id="liga-nombre">Bronce</span></p>
+                </div>
             </div>
-            <!-- Nueva línea para la liga -->
-            <p style="margin: 0; font-size: 0.8rem; color: #ffa000;">🏆 Liga: <span id="liga-nombre">Bronce</span></p>
-        </div>
-    </div>
 
-    <!-- BOTONES DE ACCIÓN (Asegúrate de que esta parte esté así) -->
-    <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-        <button id="btn-ver-historial">Ver historial</button>
-        <button id="btn-ranking" style="background-color: #ffeb3b; border: 1px solid #fbc02d;">Clasificación 🏆</button>
-        
-        <!-- ESTE ES EL BOTÓN QUE BUSCAMOS -->
-        <button id="btn-guardar-puntos" style="background-color: #4caf50; color: white; font-weight: bold; padding: 10px;">
-            Guardar Puntos (Profesor)
-        </button>
-        
-        <button id="btn-reiniciar-puntos" style="font-size: 10px;">Reiniciar sesión</button>
-    </div>
-</header>
-        <!-- Pantallas de la aplicación (Se mantienen igual) -->
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button id="btn-ver-historial">Ver historial</button>
+                <button id="btn-ranking" style="background-color: #ffeb3b; border: 1px solid #fbc02d;">Clasificación 🏆</button>
+                <button id="btn-guardar-puntos" style="background-color: #4caf50; color: white; font-weight: bold; padding: 10px;">
+                    Guardar Puntos (Profesor)
+                </button>
+                <button id="btn-reiniciar-puntos" style="font-size: 10px;">Reiniciar sesión</button>
+            </div>
+        </header>
+
+        <!-- Pantalla de Lecciones -->
         <section id="pantalla-lecciones" class="pantalla pantalla-oculta">
             <h2>Selecciona una lección</h2>
             <div id="lecciones-container" class="grid"></div>
         </section>
 
+        <!-- Pantalla de Actividades -->
         <section id="pantalla-actividades" class="pantalla pantalla-oculta">
             <h2 id="titulo-leccion"></h2>
             <h3>Selecciona una actividad</h3>
             <div id="actividades-container" class="grid"></div>
         </section>
 
-        <section id="pantalla-actividad"  //class="pantalla pantalla-oculta">
+        <!-- Pantalla de Juego General (Traducir, Emparejar, etc.) -->
+        <section id="pantalla-actividad" class="pantalla pantalla-oculta">
             <h2 id="titulo-actividad"></h2>
             <div id="actividad-juego"></div>
             <div style="margin-top: 20px;">
@@ -59,61 +57,35 @@
             </div>
             <div id="mensaje-feedback" style="font-weight:bold; text-align:center; margin-top:1rem;"></div>
         </section>
-        <!-- Nueva sección para el Test de Contexto -->
-<section id="pantalla-contexto" class="pantalla pantalla-oculta">
-    <h2>Test de Contexto</h2>
-    
-    <!-- Selector de Bloque -->
-    <div id="setup-contexto" style="margin-bottom: 20px; background: #f0f0f0; padding: 15px; border-radius: 8px;">
-        <label>Selecciona el bloque de estudio:</label><br>
-        <select id="select-bloque" style="padding: 10px; margin-top: 10px; width: 100%;">
-            <option value="1">Palabras 1 - 20</option>
-            <option value="2">Palabras 21 - 40</option>
-            <option value="3">Palabras 41 - 60</option>
-            <option value="4">Palabras 61 - 80</option>
-        </select>
-        <button id="btn-comenzar-contexto" style="margin-top:10px; background-color: #1976d2; color:white;">
-            Comenzar Examen
-        </button>
-    </div>
 
-    <!-- Área de Juego -->
-    <div id="juego-contexto" class="pantalla-oculta">
-        <p id="progreso-contexto" style="font-weight: bold;"></p>
-        <div id="frase-con-hueco" style="font-size: 1.4rem; margin: 20px 0; padding: 20px; background: #fff; border: 1px solid #ccc; border-radius: 5px;"></div>
-        <div id="opciones-contexto" class="grid"></div>
-    </div>
-
-    <div style="margin-top: 20px;">
-        <button id="btn-volver-contexto" class="btn-volver">Volver</button>
-    </div>
-</section>
+        <!-- Pantalla UNIFICADA para el Test de Contexto -->
         <section id="pantalla-contexto" class="pantalla pantalla-oculta">
-    <h2>Examen de Vocabulario</h2>
-    
-    <!-- Configuración del Bloque -->
-    <div id="config-test" style="background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
-        <p>Elige el bloque de 20 palabras que has estudiado:</p>
-        <select id="select-bloque" style="width: 100%; padding: 10px; margin-bottom: 15px;">
-            <option value="1">Palabras 1 - 20</option>
-            <option value="2">Palabras 21 - 40</option>
-            <option value="3">Palabras 41 - 60</option>
-            <option value="4">Palabras 61 - 80</option>
-        </select>
-        <button id="btn-iniciar-examen" style="background-color: #4caf50; color: white;">Empezar Examen</button>
-    </div>
+            <h2>Examen de Vocabulario</h2>
+            
+            <!-- Configuración del Bloque -->
+            <div id="config-test" style="background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd;">
+                <p>Elige el bloque de 20 palabras que has estudiado:</p>
+                <select id="select-bloque" style="width: 100%; padding: 10px; margin-bottom: 15px;">
+                    <option value="1">Palabras 1 - 20</option>
+                    <option value="2">Palabras 21 - 40</option>
+                    <option value="3">Palabras 41 - 60</option>
+                    <option value="4">Palabras 61 - 80</option>
+                </select>
+                <button id="btn-iniciar-examen" style="background-color: #4caf50; color: white; width: 100%;">Empezar Examen</button>
+            </div>
 
-    <!-- El Juego -->
-    <div id="juego-contexto" class="pantalla-oculta" style="margin-top: 20px;">
-        <p id="info-progreso" style="font-weight: bold;"></p>
-        <div id="frase-pregunta" style="font-size: 1.3rem; padding: 20px; background: white; border: 1px solid #ccc; margin-bottom: 20px;"></div>
-        <div id="opciones-contexto" class="grid"></div>
-        <div id="feedback-contexto" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
-    </div>
+            <!-- El Juego de Contexto (Se muestra al dar a Iniciar) -->
+            <div id="juego-contexto" class="pantalla-oculta" style="margin-top: 20px;">
+                <p id="info-progreso" style="font-weight: bold;"></p>
+                <div id="frase-pregunta" style="font-size: 1.3rem; padding: 20px; background: white; border: 1px solid #ccc; margin-bottom: 20px; border-radius: 8px; min-height: 60px;"></div>
+                <div id="opciones-contexto" class="grid"></div>
+                <div id="feedback-contexto" style="margin-top: 15px; font-weight: bold; text-align: center;"></div>
+            </div>
 
-    <button id="btn-volver-de-contexto" class="btn-volver" style="margin-top: 30px;">Volver</button>
-</section>
+            <button id="btn-volver-de-contexto" class="btn-volver" style="margin-top: 30px;">Volver</button>
+        </section>
 
+        <!-- Lista de Palabras -->
         <section id="pantalla-lista-palabras" class="pantalla pantalla-oculta">
             <h2 id="titulo-lista-leccion"></h2>
             <div id="lista-palabras-container" style="margin-top: 1rem;"></div>
@@ -123,41 +95,26 @@
             </div>
         </section>
 
+        <!-- Historial -->
         <div id="pantalla-historial" class="pantalla pantalla-oculta">
             <h2>Historial de puntuaciones</h2>
             <div id="historial-container"></div>
             <button id="btn-salir-historial">Volver</button>
         </div>
 
-        <!-- Pantalla de Clasificación / Marcadores -->
-<div id="pantalla-ranking" class="pantalla pantalla-oculta">
-    <h2 id="titulo-liga-ranking">Clasificación - Liga Bronce</h2>
-    <p style="font-size: 0.9rem; color: #666;">Los mejores de esta semana</p>
-    
-    <div id="ranking-container" style="margin: 20px 0;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="border-bottom: 2px solid #ddd;">
-                    <th>#</th>
-                    <th>Alumno</th>
-                    <th>Puntos (XP)</th>
-                </tr>
-            </thead>
-            <tbody id="lista-ranking">
-                <!-- Aquí se cargarán los alumnos dinámicamente -->
-            </tbody>
-        </table>
-    </div>
-    
-    <button id="btn-volver-ranking" class="btn-volver">Volver</button>
-</div>
-    </div>
-
-    <footer style="text-align:center; margin-top: 30px; font-size: 12px; color: #888;">
-        voKblo by DGR - 2026
-    </footer>
-
-    <script src="palabras.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+        <!-- Ranking -->
+        <div id="pantalla-ranking" class="pantalla pantalla-oculta">
+            <h2 id="titulo-liga-ranking">Clasificación - Liga Bronce</h2>
+            <div id="ranking-container" style="margin: 20px 0;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #ddd;">
+                            <th>#</th>
+                            <th>Alumno</th>
+                            <th>Puntos (XP)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-ranking"></tbody>
+                </table>
+            </div>
+            <button id="btn-volver-ranking" class="btn-v
