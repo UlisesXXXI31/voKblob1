@@ -1049,7 +1049,8 @@ function mostrarPreguntaContexto() {
     const contenedorOpciones = document.getElementById("opciones-contexto");
     const progreso = document.getElementById("progreso-contexto");
     const feedback = document.getElementById("feedback-contexto");
-
+    const btnContexto = documet.getElementByiD("btn-comenzar-contexto");
+    
     feedback.textContent = "";
 
     if (indiceContexto >= palabrasBloque.length) {
@@ -1062,7 +1063,7 @@ function mostrarPreguntaContexto() {
     progreso.textContent = `Palabra ${indiceContexto + 1} de ${palabrasBloque.length}`;
     
     // Mostramos la frase (Asegúrate de que tus datos tengan la propiedad .frase)
-    contenedorFrase.innerHTML = `<p class="frase-test">${item.palabras || "Satz no disponible..."}</p>`;
+    contenedorFrase.innerHTML = `<p class="frase-test">${item.frase || "Satz no disponible..."}</p>`;
 
     // Generar opciones (Correcta + 3 distractores del mismo bloque)
     let opciones = [item.aleman];
@@ -1084,6 +1085,12 @@ function mostrarPreguntaContexto() {
         contenedorOpciones.appendChild(btn);
     });
 }
+     if (btnContexto) {
+        btnContexto.addEventListener("click", () => {
+            mostrarPreguntaContexto();
+            mostrarPantalla("pantalla-contexto");
+        });
+    }
 
 function verificarContexto(seleccion, correcta) {
     const feedback = document.getElementById("feedback-contexto");
