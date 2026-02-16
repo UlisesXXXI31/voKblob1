@@ -1022,7 +1022,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
 // ---- LÓGICA ACTIVIDAD CONTEXTO Y BLOQUES ----
 let palabrasBloque = [];
 let indiceContexto = 0;
-const btnComenzarExamen = document.getElementById("btn-comenzar-contexto");
+const btnComenzarExamen = document.getElementById("btn-iniciar-examen");
 
 
 function iniciarContexto() {
@@ -1125,7 +1125,7 @@ function verificarContexto(seleccion, correcta) {
 // Botón volver de la pantalla contexto
 document.getElementById("btn-volver-contexto").onclick = () => {
     mostrarPantalla("pantalla-actividades");
-    mostraActividades();
+    mostrarActividades();
 };
 
 // VARIABLES PARA EL TEST
