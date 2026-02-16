@@ -165,6 +165,29 @@ registerServiceWorker();
         listaPalabrasContainer.appendChild(tabla);
     }
 
+    // Función para obtener solo las palabras que el alumno quiere estudiar ahora
+    function obtenerPalabrasSeleccionadas() {
+    const selector = document.getElementById("selector-bloque-maestro");
+    const opcion = selector.value;
+
+    if (opcion === "todos") {
+        return [...leccionActual.palabras];
+    }
+
+    const bloque = parseInt(opcion);
+    const inicio = (bloque - 1) * 20;
+    const fin = inicio + 20;
+
+    const palabrasFiltradas = leccionActual.palabras.slice(inicio, fin);
+    
+    if (palabrasFiltradas.length === 0) {
+        alert("Este bloque no tiene palabras. Mostrando todas.");
+        return [...leccionActual.palabras];
+    }
+    
+    return palabrasFiltradas;
+}
+
     function mostrarActividades() {
         if (!actividadesContainer) return;
         actividadesContainer.innerHTML = "";
@@ -547,7 +570,7 @@ function actualizarRacha() {
     let traducirIndice = 0;
 
     function iniciarTraducir() {
-        traducirPalabras = [...leccionActual.palabras];
+       traducirPalabras = obtenerPalabrasSeleccionadas();
         traducirIndice = 0;
         mezclarPalabras(traducirPalabras);
         mostrarPalabraTraducir();
@@ -620,7 +643,7 @@ function actualizarRacha() {
   
 
     function iniciarEmparejar() {
-        emparejarPalabras = [...leccionActual.palabras];
+        emparejarPalabras = obtenerPalabrasSeleccionadas();
         emparejarPares = [];
         emparejarSeleccionados = [];
         emparejarBloque = 0;
@@ -675,9 +698,7 @@ function actualizarRacha() {
 
        // ... después de cargarBloqueEmparejar o al mismo nivel de ámbito global
 function seleccionarEmparejar(tipo, btn, valor) {
-    // Asegúrate de que 'feedback', 'puntos', 'actualizarPuntos', 'sonidoCorrcto', 'sonidoIncorrecto'
-    // sean accesibles globalmente o pasados como argumentos si son locales.
-    // Por la forma en que los usas, asumo que son globales.
+   
     const feedback = document.getElementById("mensaje-feedback"); // Mejor obtenerlo aquí cada vez si no es global
 
     if (emparejarSeleccionados.length === 2) return;
@@ -756,7 +777,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let eleccionIndice = 0;
 
     function iniciarEleccionMultiple() {
-        eleccionPalabras = [...leccionActual.palabras];
+        eleccionPalabras = obtenerPalabrasSeleccionadas();
         eleccionPalabras.sort(() => Math.random() - 0.5);
         eleccionIndice = 0;
         mostrarPreguntaEleccion();
@@ -825,7 +846,7 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let escucharIndice = 0;
 
     function iniciarEscuchar() {
-        escucharPalabras = [...leccionActual.palabras];
+        escucharPalabras = obtenerPalabrasSeleccionadas();
         escucharIndice = 0;
         mezclarPalabras(escucharPalabras);
         mostrarPalabraEscuchar();
@@ -905,7 +926,8 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let indicePalabraActual;
 
     function iniciarPronunciar(leccionSeleccionada) {
-        palabrasPronunciacion = leccionSeleccionada.palabras.map(p => p.aleman);
+         palabrasPronunciacion = obtenerPalabrasSeleccionadas();   
+        // palabrasPronunciacion = leccionSeleccionada.palabras.map(p => p.aleman);
         indicePalabraActual = 0;
         mezclarPalabras(palabrasPronunciacion);
         mostrarPalabraPronunciacion();
@@ -1050,7 +1072,8 @@ if (btnIniciarExamen) {
             return;
         }
 
-        palabrasBloque = leccionActual.palabras.slice(inicio, fin);
+        palabrasBloque = obtenerPalabrasSeleccionadas();
+        //palabrasBloque = leccionActual.palabras.slice(inicio, fin);
 
         if (palabrasBloque.length === 0) {
             alert("Este bloque está vacío.");
