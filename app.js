@@ -1019,187 +1019,106 @@ function seleccionarEmparejar(tipo, btn, valor) {
     actualizarPuntos();
 
 
-// ---- LÓGICA ACTIVIDAD CONTEXTO Y BLOQUES ----
+// --- LÓGICA TEST DE CONTEXTO SIN ERRORES ---
 let palabrasBloque = [];
 let indiceContexto = 0;
-const btnComenzarExamen = document.getElementById("btn-iniciar-examen");
 
-
+// 1. Función para iniciar la configuración
 function iniciarContexto() {
-    const numBloque = parseInt(document.getElementById("select-bloque").value);
-    const inicio = (numBloque - 1) * 20;
-    const fin = inicio + 20;
-
-    // 1. Filtramos solo las 20 palabras de ese bloque de la lección actual
-    palabrasBloque = leccionActual.palabras.slice(inicio, fin);
-
-    if (palabrasBloque.length === 0) {
-        alert("No hay palabras en este bloque.");
-        return;
-    }
-
-    // 2. Mezclamos el bloque
-    palabrasBloque.sort(() => Math.random() - 0.5);
-    
     indiceContexto = 0;
     mostrarPantalla("pantalla-contexto");
-    mostrarPreguntaContexto();
+    
+    // Aseguramos que se vea la configuración y se oculte el juego al principio
+    const configDiv = document.getElementById("config-test");
+    const juegoDiv = document.getElementById("juego-contexto");
+    if (configDiv) configDiv.classList.remove("pantalla-oculta");
+    if (juegoDiv) juegoDiv.classList.add("pantalla-oculta");
 }
 
-function mostrarPreguntaContexto() {
-    const contenedorFrase = document.getElementById("frase-area");
-    const contenedorOpciones = document.getElementById("opciones-contexto");
-    const progreso = document.getElementById("progreso-contexto");
-    const feedback = document.getElementById("feedback-contexto");
-    
-    feedback.textContent = "";
+// 2. Evento para el botón de empezar examen
+const btnIniciarExamen = document.getElementById("btn-iniciar-examen");
+if (btnIniciarExamen) {
+    btnIniciarExamen.addEventListener("click", () => {
+        const selector = document.getElementById("select-bloque");
+        const bloqueSeleccionado = parseInt(selector.value);
+        const inicio = (bloqueSeleccionado - 1) * 20;
+        const fin = inicio + 20;
 
-    if (indiceContexto >= palabrasBloque.length) {
-        contenedorFrase.innerHTML = `<h3>¡Test finalizado!</h3><p>Has completado las 20 palabras del bloque.</p>`;
-        contenedorOpciones.innerHTML = "";
-        return;
-    }
+        // Validamos que tengamos lección seleccionada
+        if (!leccionActual) {
+            alert("Selecciona una lección primero.");
+            return;
+        }
 
-    const item = palabrasBloque[indiceContexto];
-    progreso.textContent = `Palabra ${indiceContexto + 1} de ${palabrasBloque.length}`;
-    
-    // Mostramos la frase (Asegúrate de que tus datos tengan la propiedad .frase)
-    contenedorFrase.innerHTML = `<p class="frase-test">${item.frase || "Satz no disponible..."}</p>`;
+        palabrasBloque = leccionActual.palabras.slice(inicio, fin);
 
-    // Generar opciones (Correcta + 3 distractores del mismo bloque)
-    let opciones = [item.aleman];
-    let posiblesDistractores = palabrasBloque.filter(p => p.aleman !== item.aleman);
-    
-    // Mezclar distractores y agarrar 3
-    posiblesDistractores.sort(() => Math.random() - 0.5);
-    opciones.push(...posiblesDistractores.slice(0, 3).map(p => p.aleman));
-    
-    // Mezclar las 4 opciones finales
-    opciones.sort(() => Math.random() - 0.5);
+        if (palabrasBloque.length === 0) {
+            alert("Este bloque está vacío.");
+            return;
+        }
 
-    contenedorOpciones.innerHTML = "";
-    opciones.forEach(opt => {
-        const btn = document.createElement("button");
-        btn.textContent = opt;
-        btn.className = "btn-opcion-contexto";
-        btn.onclick = () => verificarContexto(opt, item.aleman);
-        contenedorOpciones.appendChild(btn);
+        // Mezclar y preparar interfaz
+        palabrasBloque.sort(() => Math.random() - 0.5);
+        document.getElementById("config-test").classList.add("pantalla-oculta");
+        document.getElementById("juego-contexto").classList.remove("pantalla-oculta");
+        
+        mostrarPreguntaContexto();
     });
 }
-     if (btnComenzarExamen) {
-        btnComenzarExamen.addEventListener("click", () => {
-            mostrarPreguntaContexto();
-            mostrarPantalla("pantalla-contexto");
-        });
-    }
 
-function verificarContexto(seleccion, correcta) {
-    const feedback = document.getElementById("feedback-contexto");
-    const botones = document.querySelectorAll(".btn-opcion-contexto");
-    
-    // Desactivar botones para evitar doble clic
-    botones.forEach(b => b.disabled = true);
-
-    if (seleccion === correcta) {
-        feedback.textContent = "¡Correcto! ✅";
-        feedback.className = "feedback-posito";
-        sonidoCorrcto.play();
-        puntos += 2; // Damos más puntos por ser más difícil
-        actualizarRacha();
-    } else {
-        feedback.textContent = `Incorrecto ❌ La palabra era: ${correcta}`;
-        feedback.className = "feedback-negativo";
-        sonidoIncorrecto.play();
-    }
-
-    actualizarPuntos();
-    localStorage.setItem('puntosTotales', puntos.toString());
-
-    setTimeout(() => {
-        indiceContexto++;
-        mostrarPreguntaContexto();
-    }, 2000);
-}
-
-
-// Botón volver de la pantalla contexto
-document.getElementById("btn-volver-contexto").onclick = () => {
-    mostrarPantalla("pantalla-actividades");
-    mostrarActividades();
-};
-
-// VARIABLES PARA EL TEST
-let palabrasDelExamen = [];
-let indicePregunta = 0;
-
-// Escuchar el botón de iniciar examen
-document.getElementById("btn-iniciar-examen").addEventListener("click", () => {
-    const bloque = parseInt(document.getElementById("select-bloque").value);
-    const inicio = (bloque - 1) * 20;
-    const fin = inicio + 20;
-
-    // Filtramos exactamente las 20 palabras de la lección seleccionada
-    palabrasDelExamen = leccionActual.palabras.slice(inicio, fin);
-
-    if (palabrasDelExamen.length === 0) {
-        alert("No hay suficientes palabras en este bloque.");
-        return;
-    }
-
-    // Mezclamos las 20 palabras para que el examen sea aleatorio
-    palabrasDelExamen.sort(() => Math.random() - 0.5);
-    
-    indicePregunta = 0;
-    document.getElementById("config-test").classList.add("pantalla-oculta");
-    document.getElementById("juego-contexto").classList.remove("pantalla-oculta");
-    lanzarPreguntaContexto();
-});
-
-function lanzarPreguntaContexto() {
+// 3. Función principal del juego
+function mostrarPreguntaContexto() {
     const contenedorFrase = document.getElementById("frase-pregunta");
     const contenedorOpciones = document.getElementById("opciones-contexto");
     const progreso = document.getElementById("info-progreso");
     const feedback = document.getElementById("feedback-contexto");
 
-    feedback.textContent = "";
-
-    if (indicePregunta >= palabrasDelExamen.length) {
-        contenedorFrase.innerHTML = `<div style="text-align:center;"><h3>Examen Finalizado</h3><p>¡Buen trabajo! Enseña esta pantalla al profesor.</p></div>`;
-        contenedorOpciones.innerHTML = "";
-        progreso.textContent = "";
+    // Verificación de seguridad para evitar el error de "null"
+    if (!contenedorFrase || !contenedorOpciones || !progreso || !feedback) {
+        console.error("Error: No se encuentran los elementos del test en el HTML.");
         return;
     }
 
-    const item = palabrasDelExamen[indicePregunta];
-    progreso.textContent = `Pregunta ${indicePregunta + 1} de ${palabrasDelExamen.length}`;
-    
-    // Mostramos la frase con el hueco
-    contenedorFrase.textContent = item.frase || "Debes añadir frases en palabras.js...";
+    feedback.textContent = "";
 
-    // Generar 4 opciones: La correcta + 3 distractores del MISMO bloque de 20
+    if (indiceContexto >= palabrasBloque.length) {
+        contenedorFrase.innerHTML = "<div style='text-align:center;'><h3>¡Examen Finalizado! ✅</h3><p>Enhorabuena, has terminado este bloque.</p></div>";
+        contenedorOpciones.innerHTML = "";
+        progreso.textContent = "";
+        guardarPuntuacionEnHistorial(); // Guarda los puntos al servidor
+        return;
+    }
+
+    const item = palabrasBloque[indiceContexto];
+    progreso.textContent = `Pregunta ${indiceContexto + 1} de ${palabrasBloque.length}`;
+    
+    // Si no hay frase, mostramos un aviso amable
+    contenedorFrase.textContent = item.frase || "Falta la frase de ejemplo para esta palabra...";
+
+    // Generar opciones: Correcta + 3 distractores
     let opciones = [item.aleman];
-    let candidatos = palabrasDelExamen.filter(p => p.aleman !== item.aleman);
-    candidatos.sort(() => Math.random() - 0.5);
-    opciones.push(...candidatos.slice(0, 3).map(p => p.aleman));
+    let otros = palabrasBloque.filter(p => p.aleman !== item.aleman);
+    otros.sort(() => Math.random() - 0.5);
+    opciones.push(...otros.slice(0, 3).map(p => p.aleman));
     opciones.sort(() => Math.random() - 0.5);
 
     contenedorOpciones.innerHTML = "";
     opciones.forEach(opt => {
         const btn = document.createElement("button");
         btn.textContent = opt;
-        btn.className = "actividad-btn"; // Usamos tu clase de estilo
+        btn.className = "actividad-btn";
         btn.onclick = () => {
             if (opt === item.aleman) {
-                feedback.textContent = "¡Correcto! ✅";
+                feedback.textContent = "Sehr gut! 🌟";
                 feedback.style.color = "green";
                 sonidoCorrcto.play();
-                puntos++;
+                puntos += 2;
                 actualizarRacha();
                 actualizarPuntos();
-                indicePregunta++;
-                setTimeout(lanzarPreguntaContexto, 1200);
+                indiceContexto++;
+                setTimeout(mostrarPreguntaContexto, 1500);
             } else {
-                feedback.textContent = `Incorrecto ❌ La palabra era: ${item.aleman}`;
+                feedback.textContent = `Falsch! ❌ Era: ${item.aleman}`;
                 feedback.style.color = "red";
                 sonidoIncorrecto.play();
             }
@@ -1208,11 +1127,12 @@ function lanzarPreguntaContexto() {
     });
 }
 
-// Configurar el botón de volver de esta pantalla
-document.getElementById("btn-volver-de-contexto").onclick = () => {
-    document.getElementById("config-test").classList.remove("pantalla-oculta");
-    document.getElementById("juego-contexto").classList.add("pantalla-oculta");
-    mostrarPantalla("pantalla-actividades");
-    mostrarActividades();
-};
+// 4. Botón Volver
+const btnVolverContexto = document.getElementById("btn-volver-de-contexto");
+if (btnVolverContexto) {
+    btnVolverContexto.onclick = () => {
+        mostrarPantalla("pantalla-actividades");
+        mostrarActividades(); // Corregido el nombre (con 'r')
+    };
+}
 });
