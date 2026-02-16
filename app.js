@@ -1049,7 +1049,7 @@ function mostrarPreguntaContexto() {
     const contenedorOpciones = document.getElementById("opciones-contexto");
     const progreso = document.getElementById("progreso-contexto");
     const feedback = document.getElementById("feedback-contexto");
-    const btnContexto = documet.getElementByiD("btn-comenzar-contexto");
+    const btnContexto = document.getElementById("btn-comenzar-contexto");
     
     feedback.textContent = "";
 
