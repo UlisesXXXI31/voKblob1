@@ -218,30 +218,35 @@ registerServiceWorker();
     if (!tablaBody) return;
 
     try {
-        const response = await fetch('https://ls-api-b1.vercel.app/leaderboard');
+        // Añadimos un parámetro de tiempo para evitar que el navegador use datos viejos (caché)
+        const response = await fetch('https://ls-api-b1.vercel.app/leaderboard?t=' + Date.now());
         const data = await response.json();
 
-        // Log para ver qué llega (puedes borrarlo luego)
-        console.log("Datos del ranking recibidos:", data);
+        console.log("Revisando datos del ranking:", data.leaderboard);
 
         tablaBody.innerHTML = ''; 
 
         if (data.leaderboard && data.leaderboard.length > 0) {
             data.leaderboard.forEach((alumno, index) => {
-                // Buscamos los puntos con seguridad
+                
+                // --- BUSCADOR ULTRA-RESISTENTE DE PUNTOS ---
                 let puntosXp = 0;
+                
                 if (alumno.stats && typeof alumno.stats.points !== 'undefined') {
                     puntosXp = alumno.stats.points;
                 } else if (typeof alumno.points !== 'undefined') {
                     puntosXp = alumno.points;
+                } else if (alumno.stats && typeof alumno.stats.points === 'string') {
+                    puntosXp = parseInt(alumno.stats.points);
                 }
-                
+
                 const tr = document.createElement('tr');
-                // Añadimos una clase si es el propio alumno (opcional)
                 tr.innerHTML = `
                     <td style="padding:10px; text-align:center;">${index + 1}</td>
                     <td style="padding:10px;">${alumno.name}</td>
-                    <td style="padding:10px; text-align:center; font-weight:bold;">${puntosXp} XP</td>
+                    <td style="padding:10px; text-align:center; font-weight:bold; color: ${puntosXp > 0 ? '#1976d2' : '#000'}">
+                        ${puntosXp} XP
+                    </td>
                 `;
                 tablaBody.appendChild(tr);
             });
