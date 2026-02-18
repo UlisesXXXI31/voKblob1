@@ -217,20 +217,19 @@ registerServiceWorker();
     const tablaBody = document.getElementById('lista-ranking');
     if (!tablaBody) return;
 
-    // Ponemos un mensaje de carga
-    tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando...</td></tr>';
-
     try {
-        // Usamos la URL que ya verificamos que funciona
         const response = await fetch('https://ls-api-b1.vercel.app/leaderboard');
         const data = await response.json();
 
-        tablaBody.innerHTML = ''; // Limpiamos el "Cargando..."
+        tablaBody.innerHTML = ''; 
 
         if (data.leaderboard && data.leaderboard.length > 0) {
             data.leaderboard.forEach((alumno, index) => {
-                // Sacamos los puntos de stats.points (si existen)
-                const puntos = (alumno.stats && alumno.stats.points !== 'undefined') ? alumno.stats.points : 0;
+                // CAMBIO AQUÍ: Comprobamos si la propiedad existe, no solo si es mayor que 0
+                let puntos = 0;
+                if (alumno.stats && typeof alumno.stats.points !== 'undefined') {
+                    puntos = alumno.stats.points;
+                }
                 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -245,10 +244,8 @@ registerServiceWorker();
         }
     } catch (error) {
         console.error("Error al cargar ranking:", error);
-        tablaBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Error de conexión</td></tr>';
     }
 }
-
         
 
     if (btnReiniciarPuntos) {
@@ -496,6 +493,8 @@ function actualizarRacha() {
     })
     .then(data => {
         console.log("¡Puntos actualizados en el servidor!", data);
+
+        cargarDatosRanking(); 
         
         // Actualizamos las variables locales para no duplicar puntos
         puntosUltimaSesion = puntos;
