@@ -245,7 +245,7 @@ registerServiceWorker();
                     <td style="padding:10px; text-align:center;">${index + 1}</td>
                     <td style="padding:10px;">${alumno.name}</td>
                     <td style="padding:10px; text-align:center; font-weight:bold; color: ${puntosXp > 0 ? '#1976d2' : '#000'}">
-                        ${puntosXp} XP
+                        ${puntosXp} Puntos
                     </td>
                 `;
                 tablaBody.appendChild(tr);
