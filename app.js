@@ -213,7 +213,7 @@ registerServiceWorker();
     function actualizarPuntos() {
         if (puntosTexto) puntosTexto.textContent = `Puntos totales: ${puntos}`;
     }
-    async function cargarDatosRanking() {
+   async function cargarDatosRanking() {
     const tablaBody = document.getElementById('lista-ranking');
     if (!tablaBody) return;
 
@@ -221,21 +221,27 @@ registerServiceWorker();
         const response = await fetch('https://ls-api-b1.vercel.app/leaderboard');
         const data = await response.json();
 
+        // Log para ver qué llega (puedes borrarlo luego)
+        console.log("Datos del ranking recibidos:", data);
+
         tablaBody.innerHTML = ''; 
 
         if (data.leaderboard && data.leaderboard.length > 0) {
             data.leaderboard.forEach((alumno, index) => {
-                // CAMBIO AQUÍ: Comprobamos si la propiedad existe, no solo si es mayor que 0
-                let puntos = 0;
+                // Buscamos los puntos con seguridad
+                let puntosXp = 0;
                 if (alumno.stats && typeof alumno.stats.points !== 'undefined') {
-                    puntos = alumno.stats.points;
+                    puntosXp = alumno.stats.points;
+                } else if (typeof alumno.points !== 'undefined') {
+                    puntosXp = alumno.points;
                 }
                 
                 const tr = document.createElement('tr');
+                // Añadimos una clase si es el propio alumno (opcional)
                 tr.innerHTML = `
                     <td style="padding:10px; text-align:center;">${index + 1}</td>
                     <td style="padding:10px;">${alumno.name}</td>
-                    <td style="padding:10px; text-align:center; font-weight:bold;">${puntos} XP</td>
+                    <td style="padding:10px; text-align:center; font-weight:bold;">${puntosXp} XP</td>
                 `;
                 tablaBody.appendChild(tr);
             });
@@ -494,7 +500,9 @@ function actualizarRacha() {
     .then(data => {
         console.log("¡Puntos actualizados en el servidor!", data);
 
+        if (typeof cargarDatosRanking === 'function') {
         cargarDatosRanking(); 
+    }
         
         // Actualizamos las variables locales para no duplicar puntos
         puntosUltimaSesion = puntos;
