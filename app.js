@@ -167,7 +167,7 @@ registerServiceWorker();
 
     // Función para obtener solo las palabras que el alumno quiere estudiar ahora
     function obtenerPalabrasSeleccionadas() {
-    const selector = document.getElementById("selector-bloque-maestro");
+    const selector = document.getElementById("selector-bloque-examen");
     const opcion = selector.value;
 
     if (opcion === "todos") {
