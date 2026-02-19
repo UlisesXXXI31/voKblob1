@@ -1051,14 +1051,42 @@ function seleccionarEmparejar(tipo, btn, valor) {
     mostrarPantalla("pantalla-lecciones");
     mostrarLecciones();
     actualizarPuntos();
+    
+  // Función que filtra las plabalras por bloques
+    function filtrarPalabrasParaActividad() {
+    const inicio = document.getElementById("selector-bloque-examen").value;
+    
+    if (inicio === "todos") {
+        return [...leccionActual.palabras];
+    }
+
+    const start = parseInt(inicio);
+    const end = start + 20;
+
+    // Usamos .slice para agarrar solo el rango de 20
+    const palabrasFiltradas = leccionActual.palabras.slice(start, end);
+    
+    return palabrasFiltradas;
+}
 
 
 // --- LÓGICA TEST DE CONTEXTO SIN ERRORES ---
 let palabrasBloque = [];
 let indiceContexto = 0;
-
+    
 // 1. Función para iniciar la configuración
 function iniciarContexto() {
+
+    // 1. Obtenemos SOLO las 20 palabras seleccionadas
+    palabrasBloque = filtrarPalabrasParaActividad();
+
+    if (palabrasBloque.length === 0) {
+        alert("No hay suficientes palabras en este bloque.");
+        return;
+    }
+    // 2. Las mezclamos para que no se copien
+    palabrasBloque.sort(() => Math.random() - 0.5);
+
     indiceContexto = 0;
     mostrarPantalla("pantalla-contexto");
     
