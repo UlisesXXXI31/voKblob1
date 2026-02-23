@@ -192,6 +192,7 @@ registerServiceWorker();
         if (!actividadesContainer) return;
         actividadesContainer.innerHTML = "";
         const actividades = [
+            { id: "flashcards", nombre: "Flash Cards" },
             { id: "traducir", nombre: "Traducir" },
             { id: "emparejar", nombre: "Emparejar" },
             { id: "eleccion-multiple", nombre: "Elección múltiple" },
@@ -451,7 +452,9 @@ function actualizarRacha() {
         let currentIndex = 0;
 
         // Asignamos el índice según la actividad
-        if (actividadActual === 'traducir') {
+         if (actividadActual === 'flashcards') {
+            currentIndex = flashcardsIndice;
+        }else if (actividadActual === 'traducir') {
             currentIndex = traducirIndice;
         } else if (actividadActual === 'eleccion-multiple') {
             currentIndex = eleccionIndice;
@@ -576,6 +579,73 @@ function actualizarRacha() {
            iniciarContexto();
     }
     }
+    let listaFlashcards = [];
+let indiceFlash = 0;
+
+function iniciarFlashcards() {
+    // Usamos tu filtro maestro de bloques de 20
+    listaFlashcards = obtenerPalabrasSeleccionadas(); 
+
+    if (listaFlashcards.length === 0) {
+        alert("Selecciona primero una lección y bloque.");
+        return;
+    }
+
+    indiceFlash = 0;
+    mezclarPalabras(listaFlashcards);
+    mostrarPantalla("pantalla-flashcards");
+    actualizarTarjeta();
+}
+
+function actualizarTarjeta() {
+    const card = document.getElementById("flashcard");
+    const item = listaFlashcards[indiceFlash];
+
+    // Resetear el giro de la tarjeta al cambiar de palabra
+    card.classList.remove("flipped");
+
+    // Escribir los textos
+    document.getElementById("flash-aleman").innerText = item.aleman;
+    document.getElementById("flash-espanol").innerText = item.espanol;
+    document.getElementById("flash-frase").innerText = item.frase || "";
+    document.getElementById("progreso-flashcards").innerText = `Tarjeta ${indiceFlash + 1} de ${listaFlashcards.length}`;
+}
+
+// --- EVENTOS DE LA ACTIVIDAD FLASH CARDS---
+
+// 1. Girar tarjeta
+document.getElementById("flashcard").addEventListener("click", function() {
+    this.classList.toggle("flipped");
+});
+
+// 2. Botón Siguiente
+document.getElementById("btn-flash-next").onclick = () => {
+    if (indiceFlash < listaFlashcards.length - 1) {
+        indiceFlash++;
+        actualizarTarjeta();
+    } else {
+        alert("¡Has repasado todo el bloque!");
+    }
+};
+
+// 3. Botón Anterior
+document.getElementById("btn-flash-prev").onclick = () => {
+    if (indiceFlash > 0) {
+        indiceFlash--;
+        actualizarTarjeta();
+    }
+};
+
+// 4. Botón Volver
+document.getElementById("btn-volver-flash").onclick = () => {
+    mostrarPantalla("pantalla-actividades");
+};
+
+// --- IMPORTANTE: Actualiza iniciarActividad ---
+// Busca function iniciarActividad(idActividad) y añade:
+if (idActividad === "flashcards") {
+    iniciarFlashcards();
+}
 
     // Código de la actividad "Traducir"
     let traducirPalabras = [];
