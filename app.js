@@ -570,7 +570,7 @@ function actualizarRacha() {
             iniciarEleccionMultiple();
         } else if (idActividad === "escuchar") {
             iniciarEscuchar();
-        } else if (idActividad === "pronunciar") {
+        } else if (idActividad === "pronunciacion") {
             iniciarPronunciar(leccionActual);
         }else if (idActividad === "contexto") {
            iniciarContexto();
