@@ -132,24 +132,35 @@
             </div>
             <button id="btn-volver-ranking" class="btn-volver">Volver</button>
         </div>
-        <!-- Dentro de app-container, añade esta nueva sección -->
+        <!-- Pantalla de Flashcards -->
 <section id="pantalla-flashcards" class="pantalla pantalla-oculta">
-    <h2 id="titulo-flashcards">Tarjetas de Memoria</h2>
-    <p id="progreso-flashcards"></p>
+    <h2>Tarjetas de Memoria</h2>
+    <p id="flash-progreso" style="font-weight: bold; color: #666;"></p>
 
-    <div class="flashcard-container">
-        <div id="flashcard" class="flashcard">
-            <!-- Cara Delantera -->
-            <div class="flashcard-front">
-                <h2 id="flash-aleman">Palabra</h2>
-                <small>Toca para ver la traducción</small>
+    <!-- Escenario 3D -->
+    <div class="flashcard-escenario">
+        <div id="tarjeta-objeto" class="flashcard-objeto">
+            <!-- Cara Delantera (Alemán) -->
+            <div class="cara cara-delante">
+                <h2 id="flash-texto-aleman" style="font-size: 2.5rem;"></h2>
+                <small style="color: #1976d2;">(Toca para girar)</small>
             </div>
-            <!-- Cara Trasera -->
-            <div class="flashcard-back">
-                <h2 id="flash-espanol">Traducción</h2>
-                <p id="flash-frase" style="font-style: italic; margin-top: 10px;"></p>
+            <!-- Cara Trasera (Español) -->
+            <div class="cara cara-detras">
+                <h2 id="flash-texto-espanol" style="font-size: 2rem; color: #1976d2;"></h2>
+                <p id="flash-texto-frase" style="font-style: italic; margin-top: 15px; color: #555;"></p>
             </div>
         </div>
+    </div>
+
+    <!-- Controles de navegación -->
+    <div class="flashcard-controles">
+        <button id="btn-flash-prev" class="btn-volver">Anterior</button>
+        <button id="btn-flash-next" class="actividad-btn">Siguiente</button>
+    </div>
+
+    <button id="btn-flash-volver" class="btn-volver" style="margin-top: 30px;">Volver a Actividades</button>
+</section>
     </div>
 
     <div class="controles-flashcards">
