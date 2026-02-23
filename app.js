@@ -937,33 +937,38 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let palabrasPronunciacion;
     let indicePalabraActual;
 
-    function iniciarPronunciar() {
-    // 1. Forzamos la obtención de las palabras del bloque (las 20 de la semana)
-    const datosFiltrados = filtrarVocabularioPorBloque();
-
-    // Verificación de seguridad en consola
-    console.log("Palabras detectadas para pronunciar:", datosFiltrados);
-
-    if (!datosFiltrados || datosFiltrados.length === 0) {
-        alert("Error: No se han encontrado palabras en este bloque.");
-        return;
+    function iniciarPronunciar(leccionSeleccionada) {
+        palabrasPronunciacion = leccionSeleccionada.palabras.map(p => p.aleman);
+        indicePalabraActual = 0;
+        mezclarPalabras(palabrasPronunciacion);
+        mostrarPalabraPronunciacion();
     }
 
-    // 2. Extraemos el alemán y lo guardamos en la variable global
-    palabrasPronunciacion = datosFiltrados.map(p => p.aleman);
-    
-    // 3. Reiniciamos el contador
-    indicePalabraActual = 0;
-    
-    // 4. Mezclamos (la función que ya tienes)
-    mezclarPalabras(palabrasPronunciacion);
+    function mezclarPalabras(array){
+        array.sort(() => Math.random() - 0.5);
+    }
 
-    // 5. CAMBIO DE PANTALLA (Asegúrate de que este ID es el correcto)
-    mostrarPantalla("pantalla-actividad");
+    function mostrarPalabraPronunciacion() {
+        if (indicePalabraActual >= palabrasPronunciacion.length) {
+            if (actividadJuego) actividadJuego.innerHTML = '<p>¡Has completado todas las palabras!</p>';
+            return;
+        }
+        const palabraActual = palabrasPronunciacion[indicePalabraActual];
+        if (actividadJuego) {
+            actividadJuego.innerHTML = `
+                <h3>Pronuncia esta palabra en alemán:</h3>
+                <p style="font-size: 24px; font-weight: bold;">${palabraActual}</p>
+                <button id="btn-escuchar-pronunciacion">Escuchar</button>
+                <button id="btn-pronunciar">Pronunciar</button>
+                <p id="feedback-pronunciacion"></p>
+            `;
+        }
+        const btnEscuchar = document.getElementById('btn-escuchar-pronunciacion');
+        if (btnEscuchar) btnEscuchar.addEventListener('click', () => reproducirPronunciacion(palabraActual));
+        const btnPronunciar = document.getElementById('btn-pronunciar');
+        if (btnPronunciar) btnPronunciar.addEventListener('click', () => iniciarReconocimientoVoz(palabraActual));
+    }
 
-    // 6. LANZAMOS LA PRIMERA PALABRA
-    mostrarPalabraPronunciacion();
-}
     function mezclarPalabras(array){
         array.sort(() => Math.random() - 0.5);
     }
