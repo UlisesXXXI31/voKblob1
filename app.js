@@ -585,64 +585,63 @@ function actualizarRacha() {
 let indiceFlash = 0;
 
 function iniciarFlashcards() {
-    // Usamos tu filtro maestro de bloques de 20
-    listaFlashcards = obtenerPalabrasSeleccionadas(); 
+    listaFlashcards = obtenerPalabrasSeleccionadas(); // Tu función de bloques de 20
 
-    if (listaFlashcards.length === 0) {
-        alert("Selecciona primero una lección y bloque.");
+    if (!listaFlashcards || listaFlashcards.length === 0) {
+        alert("Selecciona primero una lección.");
         return;
     }
 
     indiceFlash = 0;
     mezclarPalabras(listaFlashcards);
-    mostrarPantalla("pantalla-flashcards");
-    actualizarTarjeta();
+    mostrarPantalla("pantalla-flashcards"); // Cambiamos a la nueva sección
+    actualizarContenidoTarjeta();
 }
 
-function actualizarTarjeta() {
-    const card = document.getElementById("flashcard");
+function actualizarContenidoTarjeta() {
     const item = listaFlashcards[indiceFlash];
+    const tarjeta = document.getElementById("tarjeta-objeto");
 
-    // Resetear el giro de la tarjeta al cambiar de palabra
-    card.classList.remove("flipped");
+    // 1. Resetear el giro siempre al cambiar de palabra
+    tarjeta.classList.remove("girada");
 
-    // Escribir los textos
-    document.getElementById("flash-aleman").innerText = item.aleman;
-    document.getElementById("flash-espanol").innerText = item.espanol;
-    document.getElementById("flash-frase").innerText = item.frase || "";
-    document.getElementById("progreso-flashcards").innerText = `Tarjeta ${indiceFlash + 1} de ${listaFlashcards.length}`;
+    // 2. Cambiar los textos de los elementos que ya están en el HTML
+    document.getElementById("flash-texto-aleman").textContent = item.aleman;
+    document.getElementById("flash-texto-espanol").textContent = item.espanol;
+    document.getElementById("flash-texto-frase").textContent = item.frase || "";
+    document.getElementById("flash-progreso").textContent = `Tarjeta ${indiceFlash + 1} de ${listaFlashcards.length}`;
 }
 
-// --- EVENTOS DE LA ACTIVIDAD FLASH CARDS---
+// C. Event Listeners (Ponlos dentro del DOMContentLoaded para que solo se activen una vez)
+document.addEventListener("DOMContentLoaded", () => {
+    
+    // Girar al tocar la tarjeta
+    const tarjeta = document.getElementById("tarjeta-objeto");
+    if(tarjeta) {
+        tarjeta.onclick = () => tarjeta.classList.toggle("girada");
+    }
 
-// 1. Girar tarjeta
-document.getElementById("flashcard").addEventListener("click", function() {
-    this.classList.toggle("flipped");
+    // Botón Siguiente
+    document.getElementById("btn-flash-next").onclick = () => {
+        if (indiceFlash < listaFlashcards.length - 1) {
+            indiceFlash++;
+            actualizarContenidoTarjeta();
+        }
+    };
+
+    // Botón Anterior
+    document.getElementById("btn-flash-prev").onclick = () => {
+        if (indiceFlash > 0) {
+            indiceFlash--;
+            actualizarContenidoTarjeta();
+        }
+    };
+
+    // Botón Volver
+    document.getElementById("btn-flash-volver").onclick = () => {
+        mostrarPantalla("pantalla-actividades");
+    };
 });
-
-// 2. Botón Siguiente
-document.getElementById("btn-flash-next").onclick = () => {
-    if (indiceFlash < listaFlashcards.length - 1) {
-        indiceFlash++;
-        actualizarTarjeta();
-    } else {
-        alert("¡Has repasado todo el bloque!");
-    }
-};
-
-// 3. Botón Anterior
-document.getElementById("btn-flash-prev").onclick = () => {
-    if (indiceFlash > 0) {
-        indiceFlash--;
-        actualizarTarjeta();
-    }
-};
-
-// 4. Botón Volver
-document.getElementById("btn-volver-flash").onclick = () => {
-    mostrarPantalla("pantalla-actividades");
-};
-
 
     // Código de la actividad "Traducir"
     let traducirPalabras = [];
