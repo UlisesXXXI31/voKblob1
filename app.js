@@ -588,13 +588,14 @@ function iniciarFlashcards() {
     listaFlashcards = obtenerPalabrasSeleccionadas(); // Tu función de bloques de 20
 
     if (!listaFlashcards || listaFlashcards.length === 0) {
-        alert("Selecciona primero una lección.");
+        alert("Selecciona primero una lección y bloque.");
         return;
     }
 
     indiceFlash = 0;
     mezclarPalabras(listaFlashcards);
-    mostrarPantalla("pantalla-flashcards"); // Cambiamos a la nueva sección
+    
+    mostrarPantalla("pantalla-flashcards"); // Asegúrate de que este ID existe en el HTML
     actualizarContenidoTarjeta();
 }
 
@@ -602,81 +603,18 @@ function actualizarContenidoTarjeta() {
     const item = listaFlashcards[indiceFlash];
     const tarjeta = document.getElementById("tarjeta-objeto");
 
+    if (!tarjeta) return;
+
     // 1. Resetear el giro siempre al cambiar de palabra
     tarjeta.classList.remove("girada");
 
-    // 2. Cambiar los textos de los elementos que ya están en el HTML
+    // 2. Cambiar los textos (Usamos los IDs que pusimos en el HTML)
     document.getElementById("flash-texto-aleman").textContent = item.aleman;
     document.getElementById("flash-texto-espanol").textContent = item.espanol;
     document.getElementById("flash-texto-frase").textContent = item.frase || "";
     document.getElementById("flash-progreso").textContent = `Tarjeta ${indiceFlash + 1} de ${listaFlashcards.length}`;
 }
-
-// C. Event Listeners (Ponlos dentro del DOMContentLoaded para que solo se activen una vez)
-document.addEventListener("DOMContentLoaded", () => {
     
-    // Girar al tocar la tarjeta
-    const tarjeta = document.getElementById("tarjeta-objeto");
-    if(tarjeta) {
-        tarjeta.onclick = () => tarjeta.classList.toggle("girada");
-    }
-
-    // Botón Siguiente
-    document.getElementById("btn-flash-next").onclick = () => {
-        if (indiceFlash < listaFlashcards.length - 1) {
-            indiceFlash++;
-            actualizarContenidoTarjeta();
-        }
-    };
-
-    // Botón Anterior
-    document.getElementById("btn-flash-prev").onclick = () => {
-        if (indiceFlash > 0) {
-            indiceFlash--;
-            actualizarContenidoTarjeta();
-        }
-    };
-
-    // Botón Volver
-    document.getElementById("btn-flash-volver").onclick = () => {
-        mostrarPantalla("pantalla-actividades");
-    };
-});
-
-    // Código de la actividad "Traducir"
-    let traducirPalabras = [];
-    let traducirIndice = 0;
-
-    function iniciarTraducir() {
-       traducirPalabras = obtenerPalabrasSeleccionadas();
-        traducirIndice = 0;
-        mezclarPalabras(traducirPalabras);
-        mostrarPalabraTraducir();
-    }
-
-    function mezclarPalabras(array){
-        array.sort(() => Math.random() - 0.5);
-    }
-
-    function mostrarPalabraTraducir() {
-        if (traducirIndice >= traducirPalabras.length) {
-            if (actividadJuego) actividadJuego.innerHTML = `<p>Has terminado la actividad Traducir.</p>`;
-            return;
-        }
-        
-        const palabra = traducirPalabras[traducirIndice];
-        if (actividadJuego) {
-            actividadJuego.innerHTML = `
-                <p><strong>Alemán:</strong> ${palabra.aleman}</p>
-                <input type="text" id="input-traducir" placeholder="Escribe la traducción en español" autocomplete="off" />
-                <div id="mensaje-feedback" style="margin-top: 1rem;"></div>
-                <button id="btn-verificar">Verificar</button>
-            `;
-            document.getElementById("btn-verificar")?.addEventListener("click", verificarTraducir);
-            document.getElementById("input-traducir")?.focus();
-        }
-    }
-
     function verificarTraducir() {
         const input = document.getElementById("input-traducir");
         const feedback = document.getElementById("mensaje-feedback");
@@ -1300,6 +1238,44 @@ if (btnVolverContexto) {
     btnVolverContexto.onclick = () => {
         mostrarPantalla("pantalla-actividades");
         mostrarActividades(); // Corregido el nombre (con 'r')
+    };
+}
+    //------FLASHCARDS---------
+    // Girar al tocar la tarjeta
+const objTarjeta = document.getElementById("tarjeta-objeto");
+if (objTarjeta) {
+    objTarjeta.onclick = () => objTarjeta.classList.toggle("girada");
+}
+
+// Botón Siguiente
+const btnSig = document.getElementById("btn-flash-next");
+if (btnSig) {
+    btnSig.onclick = () => {
+        if (indiceFlash < listaFlashcards.length - 1) {
+            indiceFlash++;
+            actualizarContenidoTarjeta();
+        } else {
+            alert("¡Has terminado el repaso de este bloque!");
+        }
+    };
+}
+
+// Botón Anterior
+const btnAnt = document.getElementById("btn-flash-prev");
+if (btnAnt) {
+    btnAnt.onclick = () => {
+        if (indiceFlash > 0) {
+            indiceFlash--;
+            actualizarContenidoTarjeta();
+        }
+    };
+}
+
+// Botón Volver
+const btnVol = document.getElementById("btn-flash-volver");
+if (btnVol) {
+    btnVol.onclick = () => {
+        mostrarPantalla("pantalla-actividades");
     };
 }
 });
