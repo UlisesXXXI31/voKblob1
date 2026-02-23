@@ -938,25 +938,32 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let indicePalabraActual;
 
     function iniciarPronunciar() {
-    // 1. Usamos la función de filtro que creamos (la del selector de bloques)
-    const bloqueParaPronunciar = obtenerPalabrasSeleccionadas();
+    // 1. Forzamos la obtención de las palabras del bloque (las 20 de la semana)
+    const datosFiltrados = filtrarVocabularioPorBloque();
 
-    if (!bloqueParaPronunciar || bloqueParaPronunciar.length === 0) {
-        alert("No hay palabras seleccionadas. Revisa el bloque.");
+    // Verificación de seguridad en consola
+    console.log("Palabras detectadas para pronunciar:", datosFiltrados);
+
+    if (!datosFiltrados || datosFiltrados.length === 0) {
+        alert("Error: No se han encontrado palabras en este bloque.");
         return;
     }
 
-    // 2. Extraemos solo el texto en alemán del bloque de 20
-    palabrasPronunciacion = bloqueParaPronunciar.map(p => p.aleman);
+    // 2. Extraemos el alemán y lo guardamos en la variable global
+    palabrasPronunciacion = datosFiltrados.map(p => p.aleman);
     
-    // 3. Reiniciamos índice y mezclamos
+    // 3. Reiniciamos el contador
     indicePalabraActual = 0;
+    
+    // 4. Mezclamos (la función que ya tienes)
     mezclarPalabras(palabrasPronunciacion);
 
-    // 4. IMPORTANTE: Llamar a la función para que se vea en pantalla
+    // 5. CAMBIO DE PANTALLA (Asegúrate de que este ID es el correcto)
+    mostrarPantalla("pantalla-actividad");
+
+    // 6. LANZAMOS LA PRIMERA PALABRA
     mostrarPalabraPronunciacion();
 }
-
     function mezclarPalabras(array){
         array.sort(() => Math.random() - 0.5);
     }
