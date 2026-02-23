@@ -565,7 +565,9 @@ function actualizarRacha() {
         }
         if (actividadJuego) actividadJuego.innerHTML = "";
         mostrarPantalla("pantalla-actividad");
-        if (idActividad === "traducir") {
+           if (idActividad === "flashcards"){
+               iniciarFlashcards();
+        } else if (idActividad === "traducir") {
             iniciarTraducir();
         } else if (idActividad === "emparejar") {
             iniciarEmparejar();
