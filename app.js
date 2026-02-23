@@ -937,14 +937,28 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let palabrasPronunciacion;
     let indicePalabraActual;
 
-    function iniciarPronunciar(leccionSeleccionada) {
-          
-        palabrasPronunciacion = leccionSeleccionada.palabras.map(p => p.aleman);
-        indicePalabraActual = 0;
-        mezclarPalabras(palabrasPronunciacion);
-        //mostrarPalabrasPronunciacion();
-        obtenerPalabrasSeleccionadas(); 
+    function iniciarPronunciar() {
+    // 1. Obtenemos las palabras filtradas del bloque (las 20 de la semana)
+    const palabrasDelBloque = obtenerVocabularioFiltrado();
+
+    if (!palabrasDelBloque || palabrasDelBloque.length === 0) {
+        alert("No hay palabras en este bloque para pronunciar.");
+        return;
     }
+
+    // 2. Extraemos solo la columna 'aleman' que es lo que necesita esta actividad
+    palabrasPronunciacion = palabrasDelBloque.map(p => p.aleman);
+    
+    // 3. Reiniciamos el índice y mezclamos
+    indicePalabraActual = 0;
+    palabrasPronunciacion.sort(() => Math.random() - 0.5);
+
+    // 4. Cambiamos a la pantalla de la actividad
+    mostrarPantalla("pantalla-actividad");
+    
+    // 5. Mostramos la primera palabra
+    mostrarPalabraPronunciacion();
+}
 
     function mezclarPalabras(array){
         array.sort(() => Math.random() - 0.5);
