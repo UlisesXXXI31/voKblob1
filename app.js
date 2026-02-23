@@ -641,11 +641,6 @@ document.getElementById("btn-volver-flash").onclick = () => {
     mostrarPantalla("pantalla-actividades");
 };
 
-// --- IMPORTANTE: Actualiza iniciarActividad ---
-// Busca function iniciarActividad(idActividad) y añade:
-if (idActividad === "flashcards") {
-    iniciarFlashcards();
-}
 
     // Código de la actividad "Traducir"
     let traducirPalabras = [];
