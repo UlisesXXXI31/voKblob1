@@ -938,25 +938,29 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let indicePalabraActual;
 
     function iniciarPronunciar() {
-    // 1. Usamos la función que ya te funciona en las otras actividades (la de los bloques de 20)
+    // 1. Obtenemos las 20 palabras del bloque seleccionado
     const palabrasDelBloque = obtenerPalabrasSeleccionadas(); 
 
     if (!palabrasDelBloque || palabrasDelBloque.length === 0) {
-        alert("No se han encontrado palabras en este bloque.");
+        alert("No se encontraron palabras. Selecciona una lección y bloque.");
         return;
     }
 
-    // 2. Extraemos el alemán (que es lo que reconoce el micrófono)
+    // 2. Extraemos el alemán para el motor de voz
     palabrasPronunciacion = palabrasDelBloque.map(p => p.aleman);
     
-    // 3. Reiniciamos el contador e iniciamos el juego
+    // 3. Reiniciamos el índice y mezclamos
     indicePalabraActual = 0;
     mezclarPalabras(palabrasPronunciacion);
 
-    // 4. Cambiamos a la pantalla de juego
+    // 4. LIMPIEZA: Nos aseguramos de que el contenedor esté vacío antes de empezar
+    const contenedor = document.getElementById("actividad-juego");
+    if (contenedor) contenedor.innerHTML = "";
+
+    // 5. CAMBIAMOS A LA PANTALLA (esto ya lo hace tu iniciarActividad, pero por si acaso)
     mostrarPantalla("pantalla-actividad");
-    
-    // 5. Lanzamos la primera palabra al monitor
+
+    // 6. ¡ESTA ES LA LÍNEA QUE FALTA! Llamamos a la función que pinta la palabra
     mostrarPalabraPronunciacion();
 }
         
@@ -967,49 +971,43 @@ function seleccionarEmparejar(tipo, btn, valor) {
     }
 
     function mostrarPalabraPronunciacion() {
+    const contenedor = document.getElementById("actividad-juego");
+    if (!contenedor) return;
+
+    // Si terminamos las 20 palabras
     if (indicePalabraActual >= palabrasPronunciacion.length) {
-        if (actividadJuego) {
-            actividadJuego.innerHTML = `
-                <div style="text-align:center; padding: 20px; border: 2px solid #4caf50; border-radius: 10px;">
-                    <h2 style="color: #4caf50;">¡Bloque Completado! ✅</h2>
-                    <p>Tu progreso de pronunciación ha sido guardado.</p>
-                    <button onclick="mostrarPantalla('pantalla-actividades')" class="btn-volver">Volver</button>
-                </div>
-            `;
-        }
-       
-        const btnEscuchar = document.getElementById('btn-escuchar-pronunciacion');
-        if (btnEscuchar) btnEscuchar.addEventListener('click', () => reproducirPronunciacion(palabraActual));
-        const btnPronunciar = document.getElementById('btn-pronunciar');
-        if (btnPronunciar) btnPronunciar.addEventListener('click', () => iniciarReconocimientoVoz(palabraActual));
-        
-        // ENVÍO AUTOMÁTICO AL PROFESOR
-        // Esto enviará los puntos ganados en este bloque de 20 palabras
+        contenedor.innerHTML = `
+            <div style="text-align:center; padding: 20px;">
+                <h2 style="color: #4caf50;">¡Prueba de Pronunciación Terminada! ✅</h2>
+                <p>Tus puntos han sido enviados al ranking.</p>
+            </div>
+        `;
         guardarPuntuacionEnHistorial(); 
         return;
     }
 
     const palabraActual = palabrasPronunciacion[indicePalabraActual];
-    
-    if (actividadJuego) {
-        actividadJuego.innerHTML = `
-            <div class="pronunciacion-card">
-                <p style="color: #666;">Palabra ${indicePalabraActual + 1} de ${palabrasPronunciacion.length}</p>
-                <h3 style="margin-bottom: 10px;">Pronuncia en alemán:</h3>
-                <p style="font-size: 32px; font-weight: bold; color: #1976d2; margin: 20px 0;">${palabraActual}</p>
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button id="btn-escuchar-pronunciacion" class="actividad-btn">🔊 Escuchar</button>
-                    <button id="btn-pronunciar" class="actividad-btn" style="background-color: #f44336;">🎤 Hablar</button>
-                </div>
-                <p id="feedback-pronunciacion" style="margin-top: 20px; min-height: 24px; font-weight: bold;"></p>
-            </div>
-        `;
-    }
 
-    // Re-vinculamos los eventos de los nuevos botones creados
+    // INYECTAMOS EL CONTENIDO (Lo que no sale en tu foto)
+    contenedor.innerHTML = `
+        <div class="pronunciacion-card" style="text-align:center;">
+            <p style="color: #666;">Palabra ${indicePalabraActual + 1} de ${palabrasPronunciacion.length}</p>
+            <h2 style="font-size: 3rem; margin: 20px 0; color: #1976d2;">${palabraActual}</h2>
+            
+            <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px;">
+                <button id="btn-escuchar-pronunciacion" class="actividad-btn">🔊 Escuchar</button>
+                <button id="btn-pronunciar" class="actividad-btn" style="background-color: #f44336; color:white;">🎤 Hablar</button>
+            </div>
+            
+            <p id="feedback-pronunciacion" style="font-weight: bold; height: 25px;"></p>
+        </div>
+    `;
+
+    // VINCULAMOS LOS EVENTOS (Justo después de crear los botones)
     document.getElementById('btn-escuchar-pronunciacion').onclick = () => reproducirPronunciacion(palabraActual);
     document.getElementById('btn-pronunciar').onclick = () => iniciarReconocimientoVoz(palabraActual);
 }
+    
     function reproducirPronunciacion(palabra) {
         const utterance = new SpeechSynthesisUtterance(palabra);
         utterance.lang = 'de-DE';
