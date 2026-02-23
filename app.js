@@ -938,11 +938,12 @@ function seleccionarEmparejar(tipo, btn, valor) {
     let indicePalabraActual;
 
     function iniciarPronunciar(leccionSeleccionada) {
-         palabrasPronunciacion = obtenerPalabrasSeleccionadas();   
-        // palabrasPronunciacion = leccionSeleccionada.palabras.map(p => p.aleman);
+          
+        palabrasPronunciacion = leccionSeleccionada.palabras.map(p => p.aleman);
         indicePalabraActual = 0;
         mezclarPalabras(palabrasPronunciacion);
-        mostrarPalabraPronunciacion();
+        //mostrarPalabrasPronunciacion();
+        obtenerPalabrasSeleccionadas(); 
     }
 
     function mezclarPalabras(array){
