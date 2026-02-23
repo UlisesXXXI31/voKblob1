@@ -132,6 +132,33 @@
             </div>
             <button id="btn-volver-ranking" class="btn-volver">Volver</button>
         </div>
+        <!-- Dentro de app-container, añade esta nueva sección -->
+<section id="pantalla-flashcards" class="pantalla pantalla-oculta">
+    <h2 id="titulo-flashcards">Tarjetas de Memoria</h2>
+    <p id="progreso-flashcards"></p>
+
+    <div class="flashcard-container">
+        <div id="flashcard" class="flashcard">
+            <!-- Cara Delantera -->
+            <div class="flashcard-front">
+                <h2 id="flash-aleman">Palabra</h2>
+                <small>Toca para ver la traducción</small>
+            </div>
+            <!-- Cara Trasera -->
+            <div class="flashcard-back">
+                <h2 id="flash-espanol">Traducción</h2>
+                <p id="flash-frase" style="font-style: italic; margin-top: 10px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="controles-flashcards">
+        <button id="btn-flash-prev" class="btn-secundario">Anterior</button>
+        <button id="btn-flash-next" class="actividad-btn">Siguiente</button>
+    </div>
+
+    <button id="btn-volver-flash" class="btn-volver" style="margin-top: 20px;">Volver a actividades</button>
+</section>
     </div>
 
     <footer style="text-align:center; margin-top: 30px; font-size: 12px; color: #888;">
