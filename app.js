@@ -555,6 +555,7 @@ function actualizarRacha() {
         actividadActual = idActividad;
         if (tituloActividad) {
             tituloActividad.textContent = {
+                "flashcards": "Actividad: Flashcards",
                 "traducir": "Actividad: Traducir",
                 "emparejar": "Actividad: Emparejar",
                 "eleccion-multiple": "Actividad: Elección múltiple",
