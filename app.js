@@ -564,7 +564,9 @@ function actualizarRacha() {
                 "contexto": "Actividad: Contexto"
             }[idActividad] || "Actividad";
         }
+        
         if (actividadJuego) actividadJuego.innerHTML = "";
+        
         mostrarPantalla("pantalla-actividad");
            if (idActividad === "flashcards"){
                iniciarFlashcards();
@@ -581,7 +583,7 @@ function actualizarRacha() {
         }else if (idActividad === "contexto") {
            iniciarContexto();
     }
-    }
+    
     let listaFlashcards = [];
 let indiceFlash = 0;
 
