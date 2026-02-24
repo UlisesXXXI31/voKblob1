@@ -583,6 +583,7 @@ function actualizarRacha() {
         }else if (idActividad === "contexto") {
            iniciarContexto();
     }
+    }
     
     let listaFlashcards = [];
 let indiceFlash = 0;
