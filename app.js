@@ -617,7 +617,47 @@ function actualizarContenidoTarjeta() {
     document.getElementById("flash-texto-frase").textContent = item.frase || "";
     document.getElementById("flash-progreso").textContent = `Tarjeta ${indiceFlash + 1} de ${listaFlashcards.length}`;
 }
+    function iniciarTraducir() {
+    // 1. Usamos el filtro maestro de 20 palabras
+    traducirPalabras = obtenerPalabrasSeleccionadas(); 
+
+    if (!traducirPalabras || traducirPalabras.length === 0) {
+        alert("Selecciona un bloque de palabras válido.");
+        return;
+    }
+
+    // 2. Preparamos el juego
+    traducirIndice = 0;
+    mezclarPalabras(traducirPalabras);
+
+    // 3. ¡IMPORTANTE! Llamamos a la función que pinta el contenido
+    mostrarPalabraTraducir();
+}
+    function mezclarPalabras(array){
+            array.sort(() => Math.random() - 0.5);
+        }
     
+    function mostrarPalabraTraducir() {
+        if (traducirIndice >= traducirPalabras.length) {
+            if (actividadJuego) actividadJuego.innerHTML = `<p>Has terminado la actividad Traducir.</p>`;
+            return;
+          
+        }
+      
+        
+        const palabra = traducirPalabras[traducirIndice];
+        if (actividadJuego) {
+            actividadJuego.innerHTML = `
+                <p><strong>Alemán:</strong> ${palabra.aleman}</p>
+                <input type="text" id="input-traducir" placeholder="Escribe la traducción en español" autocomplete="off" />
+                <div id="mensaje-feedback" style="margin-top: 1rem;"></div>
+                <button id="btn-verificar">Verificar</button>
+            `;
+            document.getElementById("btn-verificar")?.addEventListener("click", verificarTraducir);
+            document.getElementById("input-traducir")?.focus();
+        }
+    }
+
     function verificarTraducir() {
         const input = document.getElementById("input-traducir");
         const feedback = document.getElementById("mensaje-feedback");
