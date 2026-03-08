@@ -426,35 +426,43 @@ function actualizarRacha() {
   function guardarPuntuacionEnHistorial() {
     console.log("Dentro de guardarPuntuacionEnHistorial()...");
     
+    // 0. Referencia al botón para poder bloquearlo
+    const btnGuardar = document.getElementById("btn-guardar-puntos");
+
     // 1. Obtener datos del usuario y el TOKEN
     const userData = JSON.parse(localStorage.getItem('userData'));
-    const token = localStorage.getItem('token'); // <--- ¡IMPORTANTE!
+    const token = localStorage.getItem('token');
 
     if (!userData || !userData.id || !token) {
         console.error("Error: No hay sesión activa o falta el ID/Token.");
-        // (Aquí se mantiene la lógica de guardado local por si acaso...)
         return;
     }
 
     const puntosSesion = puntos - puntosUltimaSesion;
     
-    // Solo enviamos si realmente ha ganado puntos nuevos
+    // 2. VALIDACIÓN: Solo enviamos si realmente ha ganado puntos nuevos
     if (puntosSesion <= 0) {
         console.log("No hay puntos nuevos para guardar.");
+        alert("No tienes puntos nuevos para subir.");
         return;
     }
 
+    // 3. BLOQUEO DEL BOTÓN: Evita el spam (multi-clic)
+    if (btnGuardar) {
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = "Guardando...";
+        btnGuardar.style.backgroundColor = "#ccc"; 
+    }
     
-    // --- LÓGICA DE COMPLETADO CORREGIDA ---
+    // --- LÓGICA DE COMPLETADO ---
     let isCompleted = false;
     if (actividadActual && leccionActual && leccionActual.palabras) {
         let totalItems = leccionActual.palabras.length;
         let currentIndex = 0;
 
-        // Asignamos el índice según la actividad
-         if (actividadActual === 'flashcards') {
-            currentIndex = flashcardsIndice;
-        }else if (actividadActual === 'traducir') {
+        if (actividadActual === 'flashcards') {
+            currentIndex = typeof flashcardsIndice !== 'undefined' ? flashcardsIndice : 0;
+        } else if (actividadActual === 'traducir') {
             currentIndex = traducirIndice;
         } else if (actividadActual === 'eleccion-multiple') {
             currentIndex = eleccionIndice;
@@ -464,38 +472,32 @@ function actualizarRacha() {
             currentIndex = indicePalabraActual;
         } else if (actividadActual === 'contexto') {
             currentIndex = indiceContexto;
-            // Para el test de contexto, el total no es la lección, sino las 20 del bloque
-            totalItems = palabrasBloque.length; 
+            totalItems = typeof palabrasBloque !== 'undefined' ? palabrasBloque.length : 20; 
         } else if (actividadActual === 'emparejar') {
-            // Lógica especial para emparejar: usamos el tamaño del bloque (10)
-            if (emparejarBloque * BLOQUE_TAMANIO >= totalItems) {
-                isCompleted = true;
-            }
+            if (emparejarBloque * BLOQUE_TAMANIO >= totalItems) isCompleted = true;
         }
 
-        // Para las actividades que usan índice numérico (todas menos emparejar)
         if (actividadActual !== 'emparejar') {
-            if (currentIndex >= totalItems && totalItems > 0) {
-                isCompleted = true;
-            }
+            if (currentIndex >= totalItems && totalItems > 0) isCompleted = true;
         }
     }
+
     const progressData = {
         user: userData.id, 
-        lessonName: leccionActual.nombre, 
+        lessonName: leccionActual ? leccionActual.nombre : "General", 
         taskName: actividadActual,
-        score: parseInt(puntosSesion), // Forzamos que sea número
+        score: parseInt(puntosSesion),
         completed: isCompleted
     };
 
     console.log("Enviando a la API:", progressData);
 
-    // 2. PETICIÓN CORREGIDA CON HEADERS DE AUTORIZACIÓN
+    // 4. PETICIÓN AL SERVIDOR
     fetch(`${API_BASE_URL}/progress`, {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // <--- ¡CLAVE PARA QUE EL SERVER ACEPTE!
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(progressData)
     })
@@ -509,28 +511,39 @@ function actualizarRacha() {
         console.log("¡Puntos actualizados en el servidor!", data);
 
         if (typeof cargarDatosRanking === 'function') {
-        cargarDatosRanking(); 
-    }
+            cargarDatosRanking(); 
+        }
         
-        // Actualizamos las variables locales para no duplicar puntos
+        // MUY IMPORTANTE: Actualizamos las variables locales para que el próximo clic dé 0 puntos
         puntosUltimaSesion = puntos;
         localStorage.setItem("puntosUltimaSesionGuardados", puntosUltimaSesion.toString());
         localStorage.setItem('puntosTotales', puntos.toString());
+
+        // Guardado en historial local (dentro del éxito para ser coherentes)
+        const historial = JSON.parse(localStorage.getItem("historialPuntos")) || [];
+        historial.push({
+            fecha: new Date().toLocaleString(),
+            leccion: leccionActual ? leccionActual.nombre : "General",
+            actividad: actividadActual,
+            puntos: puntosSesion,
+            correo: userData.email
+        });
+        localStorage.setItem("historialPuntos", JSON.stringify(historial));
+        
+        alert("Puntos guardados con éxito ✅");
     })
     .catch(error => {
         console.error('Error al guardar puntos:', error);
+        alert("Error al conectar con el profesor. Inténtalo de nuevo.");
+    }) // <--- AQUÍ NO VA PUNTO Y COMA
+    .finally(() => {
+        // 5. REACTIVAR EL BOTÓN (Solo después de que el servidor responda)
+        if (btnGuardar) {
+            btnGuardar.disabled = false;
+            btnGuardar.textContent = "Guardar Puntos (Profesor)";
+            btnGuardar.style.backgroundColor = "#4caf50";
+        }
     });
-
-    // Guardado en historial local 
-    const historial = JSON.parse(localStorage.getItem("historialPuntos")) || [];
-    historial.push({
-        fecha: new Date().toLocaleString(),
-        leccion: leccionActual.nombre,
-        actividad: actividadActual,
-        puntos: puntosSesion,
-        correo: userData.email
-    });
-    localStorage.setItem("historialPuntos", JSON.stringify(historial));
 }
     function mostrarHistorial() {
         const historialContainer = document.getElementById("historial-container");
