@@ -432,7 +432,7 @@ function actualizarRacha() {
 
     if (!userData || !userData.id || !token) {
         console.error("Error: No hay sesión activa o falta el ID/Token.");
-        // (Aquí mantienes tu lógica de guardado local por si acaso...)
+        // (Aquí se mantiene la lógica de guardado local por si acaso...)
         return;
     }
 
@@ -444,7 +444,7 @@ function actualizarRacha() {
         return;
     }
 
-    // --- LÓGICA DE COMPLETADO (Mantén la que ya tienes) ---
+    
     // --- LÓGICA DE COMPLETADO CORREGIDA ---
     let isCompleted = false;
     if (actividadActual && leccionActual && leccionActual.palabras) {
@@ -481,7 +481,7 @@ function actualizarRacha() {
         }
     }
     const progressData = {
-        user: userData.id, // Asegúrate que en el login guardaste 'id' y no '_id'
+        user: userData.id, 
         lessonName: leccionActual.nombre, 
         taskName: actividadActual,
         score: parseInt(puntosSesion), // Forzamos que sea número
@@ -521,7 +521,7 @@ function actualizarRacha() {
         console.error('Error al guardar puntos:', error);
     });
 
-    // Guardado en historial local (opcional, lo que ya tenías)
+    // Guardado en historial local 
     const historial = JSON.parse(localStorage.getItem("historialPuntos")) || [];
     historial.push({
         fecha: new Date().toLocaleString(),
