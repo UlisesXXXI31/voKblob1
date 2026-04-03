@@ -1,18 +1,25 @@
-const CACHE_NAME = "deutschapp-page-v1";
-const OFFLINE_URL = "/offline.html";
+const CACHE_NAME = "deutschapp-page-v2"; // Subimos versión para forzar actualización
+const OFFLINE_URL = "pages/offline.html";
 
-// Cache solo los esenciales para GitHub
+// Actualizamos las rutas a la nueva estructura src/js y src/css
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/offline.html'
+  './',
+  './index.html',
+  './src/css/style.css',
+  './src/js/app.js',
+  './src/js/api.js',       
+  './src/js/palabras.js',
+  './src/js/core/config.js',
+  './src/js/core/state.js',
+  './src/js/core/ui.js',
+  './src/js/core/racha.js',
+  './pages/offline.html'
 ];
 
 self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
+      console.log('📦 Service Worker: Cacheando archivos esenciales...');
       return cache.addAll(urlsToCache);
     })
   );
@@ -20,11 +27,24 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-  event.waitUntil(self.clients.claim());
+  // Limpiar caches antiguos
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            console.log('🧹 Service Worker: Borrando cache antiguo:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+  );
+  return self.clients.claim();
 });
 
+// El resto del código de 'fetch' está perfecto, no hace falta tocarlo.
 self.addEventListener('fetch', event => {
-  // Solo cachear solicitudes GET y del mismo origen
   if (event.request.method !== 'GET' || 
       !event.request.url.startsWith(self.location.origin)) {
     return;
@@ -33,14 +53,11 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Devolver cache si existe
         if (response) {
           return response;
         }
 
-        // Hacer fetch y cachear
         return fetch(event.request).then(response => {
-          // Solo cachear respuestas válidas
           if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
@@ -55,7 +72,6 @@ self.addEventListener('fetch', event => {
         });
       })
       .catch(() => {
-        // Para navegación, devolver offline
         if (event.request.mode === 'navigate') {
           return caches.match(OFFLINE_URL);
         }
