@@ -11,7 +11,7 @@ Aquí puedes ver cómo luce **voKblo** en funcionamiento:
 | :---: | :---: |
 | ![Login](./screenshots/login.png) | ![Inicio](./screenshots/pantalla-lecciones.png) |
 
-| Menú Principal | Juego de Traducción |
+| Menú Principal | Juego de Elección Múltiple |
 | :---: | :---: |
 | ![Menú](./screenshots/pantalla-actividades.png) | ![Elección Múltiple](./screenshots/pantalla-eleccion.png) |
 
