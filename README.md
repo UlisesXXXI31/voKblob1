@@ -2,7 +2,18 @@
 
 [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)]
 
-https://ulisesxxxi31.github.io/vokblob1/ 
+### 🚀 Acceso Rápido (Demo)
+Para facilitar la revisión del proyecto sin necesidad de crear una cuenta nueva, puedes utilizar las siguientes credenciales de prueba:
+
+* **Enlace:** https://ulisesxxxi31.github.io/vokblob1/
+### Credenciales Frontend:
+* **Usuario:** `alumno1@europaschool.org`
+* **Contraseña:** `password123`
+
+### Credenciales Backend:
+* **Usuario:** `prof.prueba@europaschool.org`
+* **Contraseña:** `password123`
+
 
 ## 📸 Capturas de Pantalla
 Aquí puedes ver cómo luce **voKblo** en funcionamiento:
