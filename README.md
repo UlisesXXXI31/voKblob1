@@ -1,4 +1,4 @@
-# voKblo 🇩🇪 - Interactive Vocabulary Platform (B1 German)
+# voKblo -PLATAFORMA DE vOCABULARIO INTERACTIVA (B1 German)
 
 [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)]
 
