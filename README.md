@@ -3,7 +3,7 @@
 [![Live Demo](https://img.shields.io/badge/demo-online-brightgreen.svg)]
 
 ## 🔗 Enlaces del Proyecto
-* **Demo en vivo:** [Github - voKblo Frontend](https://ulisesxxxi31.github.io/vokblob1/)
+* **Demo en vivo:** [Github - voKblo Frontend](https://ulisesxxxi31.github.io/vokbloB1/)
 * **Repositorio del Backend (API):** [GitHub - voKblo_backend](https://github.com/UlisesXXXI31/voKblo_backend)
 
 ### 🚀 Acceso Rápido (Demo)
